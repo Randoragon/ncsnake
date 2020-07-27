@@ -1,6 +1,7 @@
 #ifndef NCSNAKE_H
 #define NCSNAKE_H
 
+#include "windows.h"
 #include "stage.h"
 
 // Variables

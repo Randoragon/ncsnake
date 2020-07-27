@@ -2,4 +2,4 @@ CC = gcc
 
 OPTS = -lncurses
 
-OBJS = ncsnake.o snake.o stage.o
+OBJS = ncsnake.o snake.o stage.o windows.o

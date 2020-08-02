@@ -2,9 +2,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "ncsnake.h"
-
 #define FPS 8
+
+// Variables
+int running;
+WINDOW *window;
+unsigned int term_h, term_w;
+
+// Forward declarations
+void die(char *msg, char *err);
+void updateDims();
+void draw();
 
 // Implementations
 void die(char *msg, char *err)

@@ -15,10 +15,10 @@ int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)
     return 0;
 }
 
-void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, GameField value)
+void gameStageFill(GameStage *stage, GameField value)
 {
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
+    for (int i = 0; i < stage->h; i++) {
+        for (int j = 0; j < stage->w; j++) {
             stage->field[i][j] = value;
         }
     }

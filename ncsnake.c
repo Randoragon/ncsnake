@@ -42,10 +42,10 @@ int main(int argc, char **argv)
     keypad(stdscr, TRUE);
     updateDims();
     GameStage stage;
-    if (gameStageCreate(&stage, term_h, term_w)) {
+    if (gameStageCreate(&stage, term_h, term_w / 2)) {
         die("failed to create stage", "malloc failed");
     }
-    gameStageFill(&stage, term_h, term_w, GAME_FIELD_EMPTY);
+    gameStageFill(&stage, GAME_FIELD_EMPTY);
 
     // Enter game loop
     running = 1;

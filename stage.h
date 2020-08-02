@@ -10,9 +10,10 @@ typedef enum {
 
 typedef struct {
     GameField **field;
+    unsigned int w, h;
 } GameStage;
 
 int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
-void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, GameField value);
+void gameStageFill(GameStage *stage, GameField value);
 
 #endif

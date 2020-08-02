@@ -21,15 +21,27 @@ void updateDims()
     getmaxyx(stdscr, term_h, term_w);
 }
 
+void draw()
+{
+    wborder(window, '|', '|', '-', '-', '+', '+', '+', '+');
+    wrefresh(window);
+}
+
 int main(int argc, char **argv)
 {
     // Initialization
     initscr();
+    noecho();
+    keypad(stdscr, TRUE);
     updateDims();
+    if (!(window = newwin(term_h, term_w, 0, 0))) {
+        die("failed to initialize window", "");
+    }
 
     // Enter game loop
     running = 1;
     while(running) {
+        draw();
 
         refresh();
         usleep(1000000 / FPS);

@@ -1,5 +1,7 @@
 # ncsnake - a simple ncurses snake game
 
+***work in progress***
+
 This repository holds the source code for my first ncurses program - a small snake game.
 This is by no means a serious project, just some practice to learn the ropes of the library.
 

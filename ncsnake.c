@@ -1,18 +1,22 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+
+#include "snake.h"
+#include "stage.h"
 
 #define FPS 8
 
 // Variables
 int running;
-WINDOW *window;
 unsigned int term_h, term_w;
 
 // Forward declarations
 void die(char *msg, char *err);
 void updateDims();
 void draw();
+void cleanup();
 
 // Implementations
 void die(char *msg, char *err)
@@ -31,8 +35,12 @@ void updateDims()
 
 void draw()
 {
-    wborder(window, '|', '|', '-', '-', '+', '+', '+', '+');
-    wrefresh(window);
+
+}
+
+void cleanup()
+{
+    endwin();
 }
 
 int main(int argc, char **argv)
@@ -42,8 +50,9 @@ int main(int argc, char **argv)
     noecho();
     keypad(stdscr, TRUE);
     updateDims();
-    if (!(window = newwin(term_h, term_w, 0, 0))) {
-        die("failed to initialize window", "");
+    GameStage stage = NULL;
+    if (stageCreate(stage, term_h, term_w)) {
+        die("failed to create stage", "malloc failed");
     }
 
     // Enter game loop
@@ -56,7 +65,7 @@ int main(int argc, char **argv)
     }
 
     // Cleanup
-    endwin();
+    cleanup();
 
     return EXIT_SUCCESS;
 }

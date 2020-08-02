@@ -3,20 +3,11 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include "ncsnake.h"
 #include "snake.h"
 #include "stage.h"
 
 #define FPS 8
-
-// Variables
-int running;
-unsigned int term_h, term_w;
-
-// Forward declarations
-void die(char *msg, char *err);
-void updateDims();
-void draw();
-void cleanup();
 
 // Implementations
 void die(char *msg, char *err)

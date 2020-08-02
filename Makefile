@@ -3,14 +3,11 @@ include config.mk
 all: $(OBJS)
 	$(CC) $(OPTS) $(OBJS) -o ncsnake
 
-ncsnake.o: ncsnake.c
-	$(CC) -c ncsnake.c
+debug: OPTS += -g
+debug: clean all
 
-snake.o: snake.c
-	$(CC) -c snake.c
-
-stage.o: stage.c
-	$(CC) -c stage.c
+%.o: %.c
+	$(CC) -c $(OPTS) $< -o $@
 
 clean:
 	rm -f -- *.o

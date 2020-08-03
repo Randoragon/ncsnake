@@ -4,11 +4,11 @@
 
 int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)
 {
-    if (!(stage->field = (GameField **)malloc(sizeof(GameField *) * h))) {
+    if (!(stage->tile = (GameTile **)malloc(sizeof(GameTile *) * h))) {
         return 1;
     }
     for (int i = 0; i < h; i++) {
-        if (!(stage->field[i] = (GameField *)malloc(sizeof(GameField) * w))) {
+        if (!(stage->tile[i] = (GameTile *)malloc(sizeof(GameTile) * w))) {
             return 1;
         }
     }
@@ -17,11 +17,11 @@ int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)
     return 0;
 }
 
-void gameStageFill(GameStage *stage, GameField value)
+void gameStageFill(GameStage *stage, GameTile value)
 {
     for (int i = 0; i < stage->h; i++) {
         for (int j = 0; j < stage->w; j++) {
-            stage->field[i][j] = value;
+            stage->tile[i][j] = value;
         }
     }
 }

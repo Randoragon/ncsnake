@@ -42,23 +42,23 @@ void init()
     if (gameStageCreate(&stage, term_h, term_w / 2)) {
         die("failed to create stage", "malloc failed");
     }
-    gameStageFill(&stage, GAME_FIELD_EMPTY);
+    gameStageFill(&stage, GAME_TILE_EMPTY);
 
     // Initialize colors that represent various tiles
-    init_pair(1 + GAME_FIELD_EMPTY  , COLOR_BLACK, COLOR_BLACK );
-    init_pair(1 + GAME_FIELD_WALL   , COLOR_BLACK, COLOR_WHITE );
-    init_pair(1 + GAME_FIELD_SNAKE  , COLOR_BLACK, COLOR_YELLOW);
-    init_pair(1 + GAME_FIELD_FOOD   , COLOR_BLACK, COLOR_GREEN );
-    init_pair(1 + GAME_FIELD_UNKNOWN, COLOR_BLACK, COLOR_RED   );
+    init_pair(1 + GAME_TILE_EMPTY  , COLOR_BLACK, COLOR_BLACK );
+    init_pair(1 + GAME_TILE_WALL   , COLOR_BLACK, COLOR_WHITE );
+    init_pair(1 + GAME_TILE_SNAKE  , COLOR_BLACK, COLOR_YELLOW);
+    init_pair(1 + GAME_TILE_FOOD   , COLOR_BLACK, COLOR_GREEN );
+    init_pair(1 + GAME_TILE_UNKNOWN, COLOR_BLACK, COLOR_RED   );
 }
 
 void draw()
 {
     for (int i = 0; i < stage.h; i++) {
         for (int j = 0; j < stage.w; j++) {
-            attron(COLOR_PAIR(1 + stage.field[i][j]));
+            attron(COLOR_PAIR(1 + stage.tile[i][j]));
             mvprintw(i, j * 2, "  ");
-            attroff(COLOR_PAIR(1 + stage.field[i][j]));
+            attroff(COLOR_PAIR(1 + stage.tile[i][j]));
         }
     }
 }

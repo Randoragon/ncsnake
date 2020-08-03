@@ -2,19 +2,19 @@
 #define STAGE_H
 
 typedef enum {
-    GAME_FIELD_EMPTY = 0,
-    GAME_FIELD_WALL,
-    GAME_FIELD_SNAKE,
-    GAME_FIELD_FOOD,
-    GAME_FIELD_UNKNOWN
-} GameField;
+    GAME_TILE_EMPTY = 0,
+    GAME_TILE_WALL,
+    GAME_TILE_SNAKE,
+    GAME_TILE_FOOD,
+    GAME_TILE_UNKNOWN
+} GameTile;
 
 typedef struct {
-    GameField **field;
+    GameTile **tile;
     unsigned int w, h;
 } GameStage;
 
 int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
-void gameStageFill(GameStage *stage, GameField value);
+void gameStageFill(GameStage *stage, GameTile value);
 
 #endif

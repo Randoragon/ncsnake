@@ -5,7 +5,8 @@ typedef enum {
     GAME_FIELD_EMPTY = 0,
     GAME_FIELD_WALL,
     GAME_FIELD_SNAKE,
-    GAME_FIELD_FOOD
+    GAME_FIELD_FOOD,
+    GAME_FIELD_UNKNOWN
 } GameField;
 
 typedef struct {

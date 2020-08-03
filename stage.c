@@ -12,6 +12,8 @@ int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)
             return 1;
         }
     }
+    stage->h = h;
+    stage->w = w;
     return 0;
 }
 

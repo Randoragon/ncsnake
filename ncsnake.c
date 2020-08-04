@@ -86,6 +86,7 @@ void showMsg(char *msg)
         line = strtok(NULL, token);
         linec++;
     }
+    free(lines);
     w = MIN(COLS - 2, w + 8);
     h = MIN(LINES - 2, linec + 4);
     y = (LINES - h) / 2;

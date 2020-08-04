@@ -100,8 +100,6 @@ int main(int argc, char **argv)
 {
     init();
 
-    showMsg("work in progress\nstand by\nthis is a test message");
-
     // Enter game loop
     running = 1;
     while(running) {

@@ -17,10 +17,16 @@ int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)
     return 0;
 }
 
-void gameStageFill(GameStage *stage, GameTile value)
+void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value)
 {
-    for (int i = 0; i < stage->h; i++) {
-        for (int j = 0; j < stage->w; j++) {
+    // Make sure coordinates are within bounds
+    if (x >= stage->w || y >= stage->h)
+        return;
+    w = (x + w >= stage->w ? stage->w - x - 1 : w);
+    h = (y + h >= stage->h ? stage->h - y - 1 : h);
+
+    for (int i = y; i < h; i++) {
+        for (int j = x; j < w; j++) {
             stage->tile[i][j] = value;
         }
     }

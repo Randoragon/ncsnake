@@ -15,6 +15,6 @@ typedef struct {
 } GameStage;
 
 int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
-void gameStageFill(GameStage *stage, GameTile value);
+void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);
 
 #endif

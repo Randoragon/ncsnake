@@ -35,7 +35,7 @@ void init()
     if (gameStageCreate(&stage, LINES, COLS / 2)) {
         die("failed to create stage", "malloc failed");
     }
-    gameStageFill(&stage, stage.h, stage.w, 0, 0, GAME_TILE_EMPTY);
+    gameStageSetDefault(&stage);
 
     // Initialize colors that represent various tiles
     init_pair(1 + GAME_TILE_EMPTY  , COLOR_BLACK, COLOR_BLACK );

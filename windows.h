@@ -13,6 +13,6 @@ Windows *windowsInit();
 WINDOW  *windowsLink(Windows *windows, char *caption, int height, int width, int starty, int startx);
 void     windowsUnlink(Windows *windows, WINDOW *win);
 void     windowsFree(Windows *windows);
-void     windowsDraw(Windows *windows);
+int      windowsDraw(Windows *windows);
 
 #endif

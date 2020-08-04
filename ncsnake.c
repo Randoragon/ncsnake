@@ -21,11 +21,6 @@ void die(char *msg, char *err)
     exit(EXIT_FAILURE);
 }
 
-void updateDims()
-{
-    getmaxyx(stdscr, term_h, term_w);
-}
-
 void init()
 {
     // Ncurses
@@ -37,11 +32,8 @@ void init()
     noecho();
     keypad(stdscr, TRUE);
 
-    // Get terminal size in rows and cols
-    updateDims();
-
     // Initialize game stage grid and set it to empty
-    if (gameStageCreate(&stage, term_h, term_w / 2)) {
+    if (gameStageCreate(&stage, LINES, COLS / 2)) {
         die("failed to create stage", "malloc failed");
     }
     gameStageFill(&stage, GAME_TILE_EMPTY);
@@ -67,7 +59,9 @@ void draw()
         }
     }
     refresh();
-    windowsDraw(windows);
+    if (windowsDraw(windows)) {
+        die("windowsDraw error", "returned non-zero");
+    }
     refresh();
 }
 
@@ -79,11 +73,25 @@ void cleanup()
 
 void showMsg(char *msg)
 {
-    int y, x, w, h;
-    w = MIN(term_w - 2, strlen(msg) + 2);
-    h = 3;
-    y = (term_h - h) / 2;
-    x = (term_w - w) / 2;
+    int y, x, w = 0, h, linec = 0;
+    char token[] = "\n", *line, *lines;
+
+    // Calculate window dimensions from text msg
+    if (!(lines = (char *)malloc(sizeof(char) * strlen(msg)))) {
+        die("showMsg error", "malloc");
+    }
+    strcpy(lines, msg);
+    line = strtok(lines, token);
+    while (line) {
+        w = MAX(w, strlen(line));
+        line = strtok(NULL, token);
+        linec++;
+    }
+    w = MIN(COLS - 2, w + 8);
+    h = MIN(LINES - 2, linec + 4);
+    y = (LINES - h) / 2;
+    x = (COLS - w) / 2;
+
     if (!windowsLink(windows, msg, h, w, y, x)) {
         die("showMsg error", "windowsLink returned non-zero");
     }
@@ -93,7 +101,7 @@ int main(int argc, char **argv)
 {
     init();
 
-    showMsg("work in progress");
+    showMsg("work in progress\nstand by\nthis is a test message");
 
     // Enter game loop
     running = 1;

@@ -92,17 +92,41 @@ void windowsFree(Windows *windows)
     }
 }
 
-void windowsDraw(Windows *windows)
+int windowsDraw(Windows *windows)
 {
     if (!windows)
-        return;
+        return 0;
 
     for (Windows *w = windows; w; w = w->next) {
         if (w->win) {
+            int hwin, wwin, linec = 1, curline;
+            char token[] = "\n", *line, *lines;
+
+            getmaxyx(w->win, hwin, wwin);
+            for (char *c = w->caption; *c; linec += (*c++ == '\n'));
+
+            // strtok modifies the original string, create a temporary copy;
+            if (!(lines = (char *)malloc(sizeof(char) * strlen(w->caption)))) {
+                return 1;
+            }
+            strcpy(lines, w->caption);
+
+            // print each caption line centered in the right place
+            line = strtok(lines, token);
+            curline = (hwin - linec) / 2;
+            while (line) {
+                int hpos = (wwin - strlen(line)) / 2;
+                mvwprintw(w->win, curline++, hpos, "%s", line);
+                line = strtok(NULL, token);
+            }
+            free(lines);
+
+            // Draw box outline
             box(w->win, 0, 0);
-            mvwprintw(w->win, 1, 1, "%s", w->caption);
+            
             wrefresh(w->win);
         }
     }
+    return 0;
 }
 

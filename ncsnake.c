@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 
 #include "ncsnake.h"
 #include "snake.h"
@@ -16,6 +17,7 @@ void die(char *msg, char *err)
         fprintf(stderr, "ncsnake: %s: %s\n", msg, err);
     else
         fprintf(stderr, "ncsnake: %s\n", msg);
+    cleanup();
     exit(EXIT_FAILURE);
 }
 
@@ -50,6 +52,9 @@ void init()
     init_pair(1 + GAME_TILE_SNAKE  , COLOR_BLACK, COLOR_YELLOW);
     init_pair(1 + GAME_TILE_FOOD   , COLOR_BLACK, COLOR_GREEN );
     init_pair(1 + GAME_TILE_UNKNOWN, COLOR_BLACK, COLOR_RED   );
+
+    // Initialize windows list
+    windows = windowsInit();
 }
 
 void draw()
@@ -61,22 +66,40 @@ void draw()
             attroff(COLOR_PAIR(1 + stage.tile[i][j]));
         }
     }
+    refresh();
+    windowsDraw(windows);
+    refresh();
 }
 
 void cleanup()
 {
+    windowsFree(windows);
     endwin();
+}
+
+void showMsg(char *msg)
+{
+    int y, x, w, h;
+    w = MIN(term_w - 2, strlen(msg) + 2);
+    h = 3;
+    y = (term_h - h) / 2;
+    x = (term_w - w) / 2;
+    if (!windowsLink(windows, msg, h, w, y, x)) {
+        die("showMsg error", "windowsLink returned non-zero");
+    }
 }
 
 int main(int argc, char **argv)
 {
     init();
 
+    showMsg("work in progress");
+
     // Enter game loop
     running = 1;
     while(running) {
-        draw();
         refresh();
+        draw();
         usleep(1000000 / FPS);
     }
 

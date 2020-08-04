@@ -5,12 +5,14 @@
 
 typedef struct Windows {
     WINDOW *win;
+    char *caption;
     struct Windows *next;
 } Windows;
 
-void    windowsInit(Windows *windows);
-WINDOW *windowsLink(Windows *windows);
-void    windowsUnlink(Windows *windows, WINDOW *win);
-void    windowsFree(Windows *windows);
+Windows *windowsInit();
+WINDOW  *windowsLink(Windows *windows, char *caption, int height, int width, int starty, int startx);
+void     windowsUnlink(Windows *windows, WINDOW *win);
+void     windowsFree(Windows *windows);
+void     windowsDraw(Windows *windows);
 
 #endif

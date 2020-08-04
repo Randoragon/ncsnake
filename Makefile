@@ -3,7 +3,7 @@ include config.mk
 all: $(OBJS)
 	$(CC) $(OPTS) $(OBJS) -o ncsnake
 
-debug: OPTS += -g
+debug: OPTS += -g -O0
 debug: clean all
 
 %.o: %.c

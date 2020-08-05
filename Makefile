@@ -3,7 +3,7 @@ include config.mk
 all: $(OBJS)
 	$(CC) $(OPTS) $(OBJS) -o ncsnake
 
-debug: OPTS += -g -O0
+debug: OPTS += -g -Og
 debug: clean all
 
 %.o: %.c
@@ -13,7 +13,8 @@ clean:
 	rm -f -- *.o
 	rm -f ncsnake
 
-install: all
+install: OPTS += -O3
+install: clean all
 	cp -- ncsnake /usr/local/bin/ncsnake
 
 uninstall:

@@ -2,7 +2,7 @@
 #define NCSNAKE_H
 
 #include "windows.h"
-#include "stage.h"
+#include "game.h"
 
 #define MIN(x, y) (((x) > (y)) ? (y) : (x))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))

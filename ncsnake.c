@@ -5,7 +5,7 @@
 
 #include "ncsnake.h"
 #include "snake.h"
-#include "stage.h"
+#include "game.h"
 
 #define FPS 8
 

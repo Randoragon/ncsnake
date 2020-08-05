@@ -1,4 +1,4 @@
-#include "stage.h"
+#include "game.h"
 #include <malloc.h>
 #include <string.h>
 
@@ -49,3 +49,4 @@ void gameStageSetDefault(GameStage *stage)
     gameStageFill(stage, 1, w - 2, h - 1, 1, GAME_TILE_WALL);
     gameStageFill(stage, h - 2, w - 2, 1, 1, GAME_TILE_EMPTY);
 }
+

@@ -11,6 +11,7 @@
 int running;
 GameStage stage;
 Windows *windows;
+Player  *players;
 
 // Forward declarations
 void die(char *msg, char *err);

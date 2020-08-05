@@ -54,7 +54,7 @@ typedef struct Player {
 } Player;
 
 // Functions
-Snake *snakeCreate(SnakeCoords *coords, SnakeDir dir);
+Snake *snakeCreate(SnakeCoords coords[], SnakeDir dir);
 int snakeAppend(Snake *head, unsigned int y, unsigned int x);
 void snakeFree(Snake *head);
 SnakeState snakeMove(Snake *head);

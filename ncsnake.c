@@ -46,6 +46,18 @@ void init()
 
     // Initialize windows list
     windows = windowsInit();
+
+    // Initialize players list
+    players = playersInit();
+
+    // Add default player
+    SnakeCoords coords[] = {
+        { .y = 5, .x = 7 },
+        { .y = 5, .x = 6 },
+        { .y = 5, .x = 5 },
+    };
+    Snake *p = snakeCreate(coords, SNAKE_DIR_RIGHT);
+    playersAdd(players, p);
 }
 
 void draw()
@@ -67,6 +79,7 @@ void draw()
 void cleanup()
 {
     windowsFree(windows);
+    playersFree(players);
     endwin();
 }
 

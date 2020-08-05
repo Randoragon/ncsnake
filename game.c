@@ -5,11 +5,11 @@
 #define GAME_STAGE_MIN_W 4
 #define GAME_STAGE_MIN_H 4
 
-Snake *snakeCreate(SnakeCoords *coords, SnakeDir dir)
+Snake *snakeCreate(SnakeCoords coords[], SnakeDir dir)
 {
     int ishead = 1;
     Snake *head = NULL, *new = NULL, *last;
-    for (SnakeCoords *c = coords; c; c++) {
+    for (int i = 0; i < sizeof(&coords) / sizeof(coords[0]); i++) {
         last = new;
         if (!(new = (Snake *)malloc(sizeof(Snake)))) {
             if (head) {
@@ -20,8 +20,8 @@ Snake *snakeCreate(SnakeCoords *coords, SnakeDir dir)
         if (last) {
             last->next = new;
         }
-        new->x = c->x;
-        new->y = c->y;
+        new->x = coords[i].x;
+        new->y = coords[i].y;
         new->dir = SNAKE_DIR_NONE;
         new->ishead = ishead;
         if (ishead) {

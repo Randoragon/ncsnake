@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "ncsnake.h"
-#include "snake.h"
 #include "game.h"
 
 #define FPS 8
@@ -38,11 +37,12 @@ void init()
     gameStageSetDefault(&stage);
 
     // Initialize colors that represent various tiles
-    init_pair(1 + GAME_TILE_EMPTY  , COLOR_BLACK, COLOR_BLACK );
-    init_pair(1 + GAME_TILE_WALL   , COLOR_BLACK, COLOR_WHITE );
-    init_pair(1 + GAME_TILE_SNAKE  , COLOR_BLACK, COLOR_YELLOW);
-    init_pair(1 + GAME_TILE_FOOD   , COLOR_BLACK, COLOR_GREEN );
-    init_pair(1 + GAME_TILE_UNKNOWN, COLOR_BLACK, COLOR_RED   );
+    init_pair(1 + GAME_TILE_EMPTY     , COLOR_BLACK, COLOR_BLACK   );
+    init_pair(1 + GAME_TILE_WALL      , COLOR_BLACK, COLOR_WHITE   );
+    init_pair(1 + GAME_TILE_SNAKE_HEAD, COLOR_BLACK, COLOR_YELLOW  );
+    init_pair(1 + GAME_TILE_SNAKE_BODY, COLOR_BLACK, COLOR_GREEN   );
+    init_pair(1 + GAME_TILE_FOOD      , COLOR_BLACK, COLOR_MAGENTA );
+    init_pair(1 + GAME_TILE_UNKNOWN   , COLOR_BLACK, COLOR_RED     );
 
     // Initialize windows list
     windows = windowsInit();

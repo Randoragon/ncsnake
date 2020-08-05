@@ -6,69 +6,10 @@
 #define GAME_STAGE_MIN_W 4
 #define GAME_STAGE_MIN_H 4
 
-Snake *snakeCreate(SnakeCoords *coords, size_t coordslen, SnakeDir dir)
+Snake *snakesInit()
 {
-    int ishead = 1;
-    Snake *head = NULL, *new = NULL, *last;
-    for (int i = 0; i < coordslen; i++) {
-        last = new;
-        if (!(new = (Snake *)malloc(sizeof(Snake)))) {
-            if (head) {
-                snakeFree(head);
-            }
-            return NULL;
-        }
-        if (last) {
-            last->next = new;
-        }
-        new->x = coords[i].x;
-        new->y = coords[i].y;
-        new->dir = SNAKE_DIR_NONE;
-        new->ishead = ishead;
-        if (ishead) {
-            new->dir = dir;
-            head = new;
-            ishead = 0;
-        }
-    }
-    return head;
-}
-
-int snakeAppend(Snake *head, unsigned int y, unsigned int x)
-{
-    if (!head)
-        return 1;
-
-    Snake *new, *last;
-    if (!(new = (Snake *)malloc(sizeof(Snake)))) {
-        return 2;
-    }
-    new->x = x;
-    new->y = y;
-    new->dir = SNAKE_DIR_NONE;
-    new->ishead = 0;
-
-    for (last = head; last && last->next; last = last->next);
-    last->next = new;
-
-    return 0;
-}
-
-void snakeFree(Snake *head)
-{
-    Snake *seg, *tmp;
-    seg = head;
-    while (seg) {
-        tmp = seg;
-        seg = seg->next;
-        free(tmp);
-    }
-}
-
-Player *playersInit()
-{
-    Player *ret;
-    if (!(ret = (Player *)malloc(sizeof(Player)))) {
+    Snake *ret;
+    if (!(ret = (Snake *)malloc(sizeof(Snake)))) {
         return NULL;
     }
     ret->head = NULL;
@@ -76,62 +17,141 @@ Player *playersInit()
     return ret;
 }
 
-int playersAdd(Player *players, Snake *head)
+void snakesFree(Snake *snakes)
 {
-    if (!players)
-        return 1;
-
-    if (!players->head) {
-        players->head = head;
-    } else {
-        Player *last, *new;
-        for (last = players; last && last->next; last = last->next);
-        if (!(new = (Player *)malloc(sizeof(Player)))) {
-            return 1;
-        }
-        last->next = new;
-        new->head  = head;
-        new->next  = NULL;
-    }
-    return 0;
-}
-
-Player *playersRemove(Player *players, Player *player)
-{
-    if (players && player) {
-        if (player == players) {
-            players = player->next;
-        } else {
-            Player *prev;
-            for (prev = players; prev && prev->next != player; prev = prev->next);
-            if (prev) {
-                prev->next = player->next;
+    Snake *s, *tmp;
+    s = snakes;
+    while (s) {
+        if (s->head) {
+            SnakeSegment *seg, *tmp;
+            seg = s->head;
+            while (seg) {
+                tmp = seg;
+                seg = seg->next;
+                free(tmp);
             }
         }
-        snakeFree(player->head);
-    }
-    return players;
-}
-
-void playersFree(Player *players)
-{
-    Player *p, *tmp;
-    p = players;
-    while (p) {
-        if (p->head) {
-            snakeFree(p->head);
-        }
-        tmp = p;
-        p = p->next;
+        tmp = s;
+        s = s->next;
         free(tmp);
     }
 }
 
-int playersDraw(Player *players, GameStage *stage)
+int snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir dir)
 {
-    for (Player *player = players; player; player = player->next) {
+    if (!snakes)
+        return 1;
+
+    // Create new snake struct
+    Snake *snew;
+    if (!(snew = (Snake *)malloc(sizeof(Snake)))) {
+        return 2;
+    }
+
+    // Create snake segments inside the snake
+    SnakeSegment *head = NULL, *new = NULL, *last;
+    for (int i = 0; i < coordslen; i++) {
+        last = new;
+        if (!(new = (SnakeSegment *)malloc(sizeof(SnakeSegment)))) {
+            free(snew);
+            if (head) {
+                snakeSegFree(head);
+            }
+            return 2;
+        }
+        if (last) {
+            last->next = new;
+        }
+        new->x = coords[i].x;
+        new->y = coords[i].y;
+        head   = (!head ? new : head);
+    }
+
+    // Copy snake metadata
+    snew->dir = dir;
+    snew->state = SNAKE_STATE_ALIVE;
+
+    // Append new snake to the snakes list
+    if (!snakes->head) {
+        snakes->head = head;
+    } else {
+        Snake *slast;
+        for (slast = snakes; slast && slast->next; slast = slast->next);
+        slast->next = snew;
+    }
+    return 0;
+}
+
+Snake *snakeRemove(Snake *snakes, Snake *snake)
+{
+    if (snakes && snake) {
+        if (snake == snakes) {
+            /* Normally if the element to remove is the first one,
+             * it's enough to simply move the pointer forward.
+             * However, if there is only one element, don't free
+             * it and instead reset its memory to NULL.
+             */
+            if (snakes->next) {
+                snakes = snakes->next;
+            } else {
+                snakes->head = NULL;
+            }
+        } else {
+            Snake *prev;
+            for (prev = snake; prev && prev->next != snake; prev = prev->next);
+            if (prev) {
+                prev->next = snake->next;
+            }
+        }
+
+        // Free snake segments memory
+        snakeSegFree(snake->head);
+    }
+    return snakes;
+}
+
+int snakeGrow(Snake *snake, unsigned int y, unsigned int x)
+{
+    if (!snake || !snake->head)
+        return 1;
+
+    // Create new snake segment on given coords
+    SnakeSegment *new, *last;
+    if (!(new = (SnakeSegment *)malloc(sizeof(SnakeSegment)))) {
+        return 2;
+    }
+    new->x = x;
+    new->y = y;
+
+    // Append the new segment to the snake
+    for (last = snake->head; last && last->next; last = last->next);
+    last->next = new;
+
+    return 0;
+}
+
+void snakesTurn(Snake *snakes, SnakeDir dir)
+{
+    for (Snake *s = snakes; s; s = s->next) {
+        s->dir = dir;
+    }
+}
+
+int snakesAdvance(Snake *snakes)
+{
+    for (Snake *s = snakes; s; s = s->next) {
+        if (s->head) {
+
+        }
+    }
+    return 0;
+}
+
+int snakesDraw(Snake *snakes, GameStage *stage)
+{
+    for (Snake *s = snakes; s; s = s->next) {
         int ishead = 1;
-        for (Snake *seg = player->head; seg; seg = seg->next) {
+        for (SnakeSegment *seg = s->head; seg; seg = seg->next) {
             if (seg->y >= stage->h || seg->x >= stage->w) {
                 return 1;
             }
@@ -140,6 +160,17 @@ int playersDraw(Player *players, GameStage *stage)
         }
     }
     return 0;
+}
+
+void snakeSegFree(SnakeSegment *head)
+{
+    SnakeSegment *seg, *tmp;
+    seg = head;
+    while(seg) {
+        tmp = seg;
+        seg = seg->next;
+        free(tmp);
+    }
 }
 
 int gameStageCreate(GameStage *stage, unsigned int h, unsigned int w)

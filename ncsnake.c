@@ -47,8 +47,8 @@ void init()
     // Initialize windows list
     windows = windowsInit();
 
-    // Initialize players list
-    players = playersInit();
+    // Initialize snakes list
+    snakes = snakesInit();
 
     // Add default player
     SnakeCoords coords[] = {
@@ -56,13 +56,12 @@ void init()
         { .y = 5, .x = 6 },
         { .y = 5, .x = 5 },
     };
-    Snake *p = snakeCreate(coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT);
-    playersAdd(players, p);
+    snakeCreate(snakes, coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT);
 }
 
 void draw()
 {
-    playersDraw(players, &stage);
+    snakesDraw(snakes, &stage);
     for (int i = 0; i < stage.h; i++) {
         for (int j = 0; j < stage.w; j++) {
             attron(COLOR_PAIR(1 + stage.tile[i][j]));
@@ -80,7 +79,7 @@ void draw()
 void cleanup()
 {
     windowsFree(windows);
-    playersFree(players);
+    snakesFree(snakes);
     endwin();
 }
 

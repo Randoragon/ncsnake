@@ -29,42 +29,42 @@ typedef enum {
 
 // Structs
 typedef struct GameStage GameStage;
-typedef struct Snake Snake;
+typedef struct SnakeSegment SnakeSegment;
 typedef struct SnakeCoords SnakeCoords;
-typedef struct Player Player;
+typedef struct Snake Snake;
 
 typedef struct GameStage {
     GameTile **tile;
     unsigned int w, h;
 } GameStage;
 
-typedef struct Snake {
-    unsigned int x, y;
-    char *ch;
-    int ishead;
-    SnakeDir dir;
-    Snake *next;
-} Snake;
-
 typedef struct SnakeCoords {
     unsigned int x, y;
 } SnakeCoords;
 
-typedef struct Player {
-    Snake *head;
-    Player *next;
-} Player;
+typedef struct SnakeSegment {
+    unsigned int x, y;
+    SnakeSegment *next;
+} SnakeSegment;
+
+typedef struct Snake {
+    SnakeSegment *head;
+    SnakeDir dir;
+    SnakeState state;
+    int growth;
+    Snake *next;
+} Snake;
 
 // Functions
-Snake *snakeCreate(SnakeCoords *coords, size_t coordslen, SnakeDir dir);
-int snakeAppend(Snake *head, unsigned int y, unsigned int x);
-void snakeFree(Snake *head);
-SnakeState snakeMove(Snake *head);
-Player *playersInit();
-int  playersAdd(Player *players, Snake *head);
-Player *playersRemove(Player *players, Player *player);
-void playersFree(Player *players);
-int  playersDraw(Player *players, GameStage *stage);
+Snake *snakesInit();
+void  snakesFree(Snake *snakes);
+int   snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir dir);
+Snake *snakeRemove(Snake *snakes, Snake *snake);
+int   snakeGrow(Snake *snake, unsigned int y, unsigned int x);
+void  snakesTurn(Snake *snakes, SnakeDir dir);
+int   snakesAdvance(Snake *snakes);
+int   snakesDraw(Snake *snake, GameStage *stage);
+void  snakeSegFree(SnakeSegment *head);
 int  gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
 void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);
 void gameStageSetDefault(GameStage *stage);

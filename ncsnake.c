@@ -90,7 +90,7 @@ void showMsg(char *msg)
     char token[] = "\n", *line, *lines;
 
     // Calculate window dimensions from text msg
-    if (!(lines = (char *)malloc(sizeof(char) * strlen(msg)))) {
+    if (!(lines = (char *)malloc(sizeof(char) * (strlen(msg) + 1)))) {
         die("showMsg error", "malloc");
     }
     strcpy(lines, msg);

@@ -1,6 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <stdlib.h>
+
 // Constants
 typedef enum {
     GAME_TILE_EMPTY = 0,
@@ -54,7 +56,7 @@ typedef struct Player {
 } Player;
 
 // Functions
-Snake *snakeCreate(SnakeCoords coords[], SnakeDir dir);
+Snake *snakeCreate(SnakeCoords *coords, size_t coordslen, SnakeDir dir);
 int snakeAppend(Snake *head, unsigned int y, unsigned int x);
 void snakeFree(Snake *head);
 SnakeState snakeMove(Snake *head);
@@ -62,7 +64,7 @@ Player *playersInit();
 int  playersAdd(Player *players, Snake *head);
 Player *playersRemove(Player *players, Player *player);
 void playersFree(Player *players);
-int  playersSpawn(Player *players, GameStage *stage);
+int  playersDraw(Player *players, GameStage *stage);
 int  gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
 void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);
 void gameStageSetDefault(GameStage *stage);

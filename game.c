@@ -1,15 +1,16 @@
 #include "game.h"
 #include <malloc.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define GAME_STAGE_MIN_W 4
 #define GAME_STAGE_MIN_H 4
 
-Snake *snakeCreate(SnakeCoords coords[], SnakeDir dir)
+Snake *snakeCreate(SnakeCoords *coords, size_t coordslen, SnakeDir dir)
 {
     int ishead = 1;
     Snake *head = NULL, *new = NULL, *last;
-    for (int i = 0; i < sizeof(&coords) / sizeof(coords[0]); i++) {
+    for (int i = 0; i < coordslen; i++) {
         last = new;
         if (!(new = (Snake *)malloc(sizeof(Snake)))) {
             if (head) {
@@ -126,7 +127,7 @@ void playersFree(Player *players)
     }
 }
 
-int playersSpawn(Player *players, GameStage *stage)
+int playersDraw(Player *players, GameStage *stage)
 {
     for (Player *player = players; player; player = player->next) {
         int ishead = 1;

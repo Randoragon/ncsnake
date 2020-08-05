@@ -56,12 +56,13 @@ void init()
         { .y = 5, .x = 6 },
         { .y = 5, .x = 5 },
     };
-    Snake *p = snakeCreate(coords, SNAKE_DIR_RIGHT);
+    Snake *p = snakeCreate(coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT);
     playersAdd(players, p);
 }
 
 void draw()
 {
+    playersDraw(players, &stage);
     for (int i = 0; i < stage.h; i++) {
         for (int j = 0; j < stage.w; j++) {
             attron(COLOR_PAIR(1 + stage.tile[i][j]));

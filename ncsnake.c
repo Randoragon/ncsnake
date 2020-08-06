@@ -42,13 +42,15 @@ void init()
     nodelay(stdscr, TRUE);
 
     // Initialize game stage grid and set it to empty
-    if (gameStageCreate(&stage, LINES, COLS / 2)) {
-        die("failed to create stage", "malloc failed");
+    for (int i = 0; i < LAYER_COUNT; i++) {
+        if (gameStageCreate(&layers[i], LINES, COLS / 2)) {
+            die("failed to create stage", "malloc failed");
+        }
+        gameStageFill(&layers[i], LINES, COLS / 2, 0, 0, GAME_TILE_EMPTY);
     }
-    gameStageSetDefault(&stage);
+    gameStageSetDefault(&layers[LAYER_WALL]);
 
     // Initialize colors that represent various tiles
-    init_pair(1 + GAME_TILE_EMPTY     , COLOR_BLACK, COLOR_BLACK   );
     init_pair(1 + GAME_TILE_WALL      , COLOR_BLACK, COLOR_WHITE   );
     init_pair(1 + GAME_TILE_SNAKE_HEAD, COLOR_BLACK, COLOR_YELLOW  );
     init_pair(1 + GAME_TILE_SNAKE_BODY, COLOR_BLACK, COLOR_GREEN   );
@@ -124,14 +126,19 @@ void step()
 
 void draw()
 {
-    if (snakesDraw(snakes, &stage)) {
+    clear();
+    if (snakesDraw(snakes, &layers[LAYER_SNAKE])) {
         warn("snakesDraw failed", "out-of-bounds snake");
     }
-    for (int i = 0; i < stage.h; i++) {
-        for (int j = 0; j < stage.w; j++) {
-            attron(COLOR_PAIR(1 + stage.tile[i][j]));
-            mvprintw(i, j * 2, "  ");
-            attroff(COLOR_PAIR(1 + stage.tile[i][j]));
+    for (int i = 0; i < LAYER_COUNT; i++) {
+        for (int j = 0; j < layers[i].h; j++) {
+            for (int k = 0; k < layers[i].w; k++) {
+                if (layers[i].tile[j][k] != GAME_TILE_EMPTY) {
+                    attron(COLOR_PAIR(1 + layers[i].tile[j][k]));
+                    mvprintw(j, k * 2, "  ");
+                    attroff(COLOR_PAIR(1 + layers[i].tile[j][k]));
+                }
+            }
         }
     }
     refresh();
@@ -143,7 +150,7 @@ void draw()
 
 void clean()
 {
-    if (snakesUndraw(snakes, &stage)) {
+    if (snakesUndraw(snakes, &layers[LAYER_SNAKE])) {
         warn("snakesUndraw failed", "out-of-bounds snake");
     }
 }

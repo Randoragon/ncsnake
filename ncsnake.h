@@ -7,9 +7,15 @@
 #define MIN(x, y) (((x) > (y)) ? (y) : (x))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
+typedef enum {
+    LAYER_WALL,
+    LAYER_SNAKE,
+    LAYER_COUNT
+} Layer;
+
 // Variables
 int running;
-GameStage stage;
+GameStage layers[LAYER_COUNT];
 Windows *windows;
 Snake *snakes;
 

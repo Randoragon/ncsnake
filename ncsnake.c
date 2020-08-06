@@ -7,6 +7,7 @@
 #include "game.h"
 
 #define FPS 8
+#define KEYBUF_SIZE 21 /* see the listen() function implementation */
 
 // Implementations
 void die(char *msg, char *err)
@@ -27,8 +28,10 @@ void init()
         die("failed to initialize colors", "no terminal support");
     }
     start_color();
+    cbreak();
     noecho();
     keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
 
     // Initialize game stage grid and set it to empty
     if (gameStageCreate(&stage, LINES, COLS / 2)) {
@@ -59,6 +62,50 @@ void init()
     snakeCreate(snakes, coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT);
 }
 
+void listen()
+{
+    /* Allow input buffering, but only for different consecutive presses!
+     * The size-1 of the keyboard buffer determines how many keys can be pressed
+     * in one game frame (FPS) before input delay kicks in.
+     */
+    int keybuf[KEYBUF_SIZE] = {0};
+    int ch, i = 1;
+    while ((ch = getch()) != ERR) {
+        if (isKeyValid(ch) && keybuf[i-1] != ch) {
+            keybuf[i++] = ch;
+        }
+        if (i >= KEYBUF_SIZE) {
+            break;
+        }
+    }
+
+    // Re-enqueue the captured keys
+    for (i = KEYBUF_SIZE - 1; i-- > 0;) {
+        if (keybuf[i])
+            ungetch(keybuf[i]);
+    }
+
+    switch(getch()) {
+        case KEY_UP: case 'k': case 'w':
+            snakesTurn(snakes, SNAKE_DIR_UP);
+            break;
+        case KEY_LEFT: case 'h': case 'a':
+            snakesTurn(snakes, SNAKE_DIR_LEFT);
+            break;
+        case KEY_DOWN: case 'j': case 's':
+            snakesTurn(snakes, SNAKE_DIR_DOWN);
+            break;
+        case KEY_RIGHT: case 'l': case 'd':
+            snakesTurn(snakes, SNAKE_DIR_RIGHT);
+            break;
+    }
+}
+
+void step()
+{
+    snakesAdvance(snakes);
+}
+
 void draw()
 {
     snakesDraw(snakes, &stage);
@@ -74,6 +121,11 @@ void draw()
         die("windowsDraw error", "returned non-zero");
     }
     refresh();
+}
+
+void clean()
+{
+    snakesUndraw(snakes, &stage);
 }
 
 void cleanup()
@@ -110,6 +162,18 @@ void showMsg(char *msg)
     }
 }
 
+int isKeyValid(int ch)
+{
+    switch(ch) {
+        case KEY_UP: case KEY_LEFT: case KEY_DOWN: case KEY_RIGHT:
+        case 'k'   : case 'h'     : case 'j'     : case 'l'      :
+        case 'w'   : case 'a'     : case 's'     : case 'd'      :
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 int main(int argc, char **argv)
 {
     init();
@@ -117,8 +181,10 @@ int main(int argc, char **argv)
     // Enter game loop
     running = 1;
     while(running) {
-        refresh();
+        listen();
+        step();
         draw();
+        clean();
         usleep(1000000 / FPS);
     }
 

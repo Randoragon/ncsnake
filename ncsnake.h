@@ -16,9 +16,13 @@ Snake *snakes;
 // Forward declarations
 void die(char *msg, char *err);
 void init();
+void listen();
+void step();
 void draw();
+void clean();
 void cleanup();
 void showMsg(char *msg);
+int  isKeyValid(int ch);
 int  main(int argc, char **argv);
 
 #endif

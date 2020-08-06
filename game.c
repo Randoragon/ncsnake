@@ -70,6 +70,7 @@ int snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir d
     // Copy snake metadata
     snew->dir = dir;
     snew->state = SNAKE_STATE_ALIVE;
+    snew->growth = 0;
 
     // Append new snake to the snakes list
     if (!snakes->head) {
@@ -133,6 +134,26 @@ int snakeGrow(Snake *snake, unsigned int y, unsigned int x)
 void snakesTurn(Snake *snakes, SnakeDir dir)
 {
     for (Snake *s = snakes; s; s = s->next) {
+        switch(dir) {
+            case SNAKE_DIR_UP:
+                if (s->dir == SNAKE_DIR_DOWN)
+                    return;
+                break;
+            case SNAKE_DIR_LEFT:
+                if (s->dir == SNAKE_DIR_RIGHT)
+                    return;
+                break;
+            case SNAKE_DIR_DOWN:
+                if (s->dir == SNAKE_DIR_UP)
+                    return;
+                break;
+            case SNAKE_DIR_RIGHT:
+                if (s->dir == SNAKE_DIR_LEFT)
+                    return;
+                break;
+            default:
+                break;
+        }
         s->dir = dir;
     }
 }
@@ -141,7 +162,54 @@ int snakesAdvance(Snake *snakes)
 {
     for (Snake *s = snakes; s; s = s->next) {
         if (s->head) {
+            unsigned int nx, ny, lx, ly;
 
+            // Get new position for head
+            nx = s->head->x;
+            ny = s->head->y;
+            switch(s->dir) {
+                case SNAKE_DIR_UP:
+                    ny -= 1;
+                    break;
+                case SNAKE_DIR_LEFT:
+                    nx -= 1;
+                    break;
+                case SNAKE_DIR_DOWN:
+                    ny += 1;
+                    break;
+                case SNAKE_DIR_RIGHT:
+                    nx += 1;
+                    break;
+                default:
+                    return 1;
+            }
+
+            // Update all segments' positions and keep the order
+            SnakeSegment *seg, *tmp;
+            int ishead = 1;
+            seg = s->head;
+            while(seg) {
+                if (ishead) {
+                    lx = seg->x;
+                    ly = seg->y;
+                    seg->x = nx;
+                    seg->y = ny;
+                    ishead = 0;
+                } else {
+                    nx = lx;
+                    ny = ly;
+                    lx = seg->x;
+                    ly = seg->y;
+                    seg->x = nx;
+                    seg->y = ny;
+                }
+                seg = seg->next;
+            }
+
+            // Append new segment in place of former last one if food was eaten
+            if (s->growth) {
+                snakeGrow(s, ly, lx);
+            }
         }
     }
     return 0;
@@ -157,6 +225,19 @@ int snakesDraw(Snake *snakes, GameStage *stage)
             }
             stage->tile[seg->y][seg->x] = (ishead ? GAME_TILE_SNAKE_HEAD : GAME_TILE_SNAKE_BODY);
             ishead = 0;
+        }
+    }
+    return 0;
+}
+
+int snakesUndraw(Snake *snakes, GameStage *stage)
+{
+    for (Snake *s = snakes; s; s = s->next) {
+        for (SnakeSegment *seg = s->head; seg; seg = seg->next) {
+            if (seg->y >= stage->h || seg->x >= stage->w) {
+                return 1;
+            }
+            stage->tile[seg->y][seg->x] = GAME_TILE_EMPTY;
         }
     }
     return 0;

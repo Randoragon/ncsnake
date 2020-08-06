@@ -48,7 +48,7 @@ int snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir d
         return 2;
     }
 
-    // Create snake segments inside the snake
+    // Create snake segments
     SnakeSegment *head = NULL, *new = NULL, *last;
     for (int i = 0; i < coordslen; i++) {
         last = new;
@@ -68,13 +68,18 @@ int snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir d
     }
 
     // Copy snake metadata
+    snew->head = head;
     snew->dir = dir;
     snew->state = SNAKE_STATE_ALIVE;
     snew->growth = 0;
 
     // Append new snake to the snakes list
     if (!snakes->head) {
-        snakes->head = head;
+        snakes->head   = snew->head;
+        snakes->dir    = snew->dir;
+        snakes->state  = snew->state;
+        snakes->growth = snew->growth;
+        free(snew);
     } else {
         Snake *slast;
         for (slast = snakes; slast && slast->next; slast = slast->next);

@@ -13,11 +13,19 @@
 void die(char *msg, char *err)
 {
     if (*err)
-        fprintf(stderr, "ncsnake: %s: %s\n", msg, err);
+        fprintf(stderr, "[err] ncsnake: %s: %s\n", msg, err);
     else
-        fprintf(stderr, "ncsnake: %s\n", msg);
+        fprintf(stderr, "[err] ncsnake: %s\n", msg);
     cleanup();
     exit(EXIT_FAILURE);
+}
+
+void warn(char *msg, char *err)
+{
+    if (*err)
+        fprintf(stderr, "[warn] ncsnake: %s: %s\n", msg, err);
+    else
+        fprintf(stderr, "[warn] ncsnake: %s\n", msg);
 }
 
 void init()
@@ -48,10 +56,14 @@ void init()
     init_pair(1 + GAME_TILE_UNKNOWN   , COLOR_BLACK, COLOR_RED     );
 
     // Initialize windows list
-    windows = windowsInit();
+    if (!(windows = windowsInit())) {
+        die("failed to initialize windows", "malloc failed");
+    }
 
     // Initialize snakes list
-    snakes = snakesInit();
+    if (!(snakes = snakesInit())) {
+        die("failed to initialize snakes", "malloc failed");
+    }
 
     // Add default player
     SnakeCoords coords[] = {
@@ -59,7 +71,9 @@ void init()
         { .y = 5, .x = 6 },
         { .y = 5, .x = 5 },
     };
-    snakeCreate(snakes, coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT);
+    if (snakeCreate(snakes, coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT)) {
+        die("failed to create snake", "snakeCreate returned non-zero");
+    }
 }
 
 void listen()
@@ -103,12 +117,16 @@ void listen()
 
 void step()
 {
-    snakesAdvance(snakes);
+    if (snakesAdvance(snakes)) {
+        warn("snakesAdvance failed", "");
+    }
 }
 
 void draw()
 {
-    snakesDraw(snakes, &stage);
+    if (snakesDraw(snakes, &stage)) {
+        warn("snakesDraw failed", "out-of-bounds snake");
+    }
     for (int i = 0; i < stage.h; i++) {
         for (int j = 0; j < stage.w; j++) {
             attron(COLOR_PAIR(1 + stage.tile[i][j]));
@@ -125,7 +143,9 @@ void draw()
 
 void clean()
 {
-    snakesUndraw(snakes, &stage);
+    if (snakesUndraw(snakes, &stage)) {
+        warn("snakesUndraw failed", "out-of-bounds snake");
+    }
 }
 
 void cleanup()

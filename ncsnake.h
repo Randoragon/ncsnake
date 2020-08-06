@@ -15,6 +15,7 @@ Snake *snakes;
 
 // Forward declarations
 void die(char *msg, char *err);
+void warn(char *msg, char *err);
 void init();
 void listen();
 void step();

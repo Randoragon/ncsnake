@@ -64,7 +64,7 @@ int   snakeGrow(Snake *snake, unsigned int y, unsigned int x);
 void  snakesTurn(Snake *snakes, SnakeDir dir);
 int   snakesAdvance(Snake *snakes);
 int   snakesDraw(Snake *snake, GameStage *stage);
-int  snakesUndraw(Snake *snakes, GameStage *stage);
+int   snakesUndraw(Snake *snakes, GameStage *stage);
 void  snakeSegFree(SnakeSegment *head);
 int  gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
 void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);

@@ -6,7 +6,7 @@
 #include "ncsnake.h"
 #include "game.h"
 
-#define FPS 8
+#define FPS 60
 #define KEYBUF_SIZE 21 /* see the listen() function implementation */
 
 // Implementations
@@ -41,6 +41,7 @@ void init()
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
     curs_set(0);
+    ESCDELAY = 0;
 
     // Initialize game stage grid and set it to empty
     for (int i = 0; i < LAYER_COUNT; i++) {
@@ -77,6 +78,12 @@ void init()
     if (snakeCreate(snakes, coords, sizeof coords / sizeof coords[0], SNAKE_DIR_RIGHT)) {
         die("failed to create snake", "snakeCreate returned non-zero");
     }
+
+    // Set game variables
+    speed = 45;
+    speedstep = FPS * 1; /* wait 1 second before starting the game */
+    foodcount = 1;
+    paused = 0;
 }
 
 void listen()
@@ -104,49 +111,61 @@ void listen()
 
     switch(getch()) {
         case KEY_UP: case 'k': case 'w':
-            snakesTurn(snakes, SNAKE_DIR_UP);
+            if (!paused)
+                snakesTurn(snakes, SNAKE_DIR_UP);
             break;
         case KEY_LEFT: case 'h': case 'a':
-            snakesTurn(snakes, SNAKE_DIR_LEFT);
+            if (!paused)
+                snakesTurn(snakes, SNAKE_DIR_LEFT);
             break;
         case KEY_DOWN: case 'j': case 's':
-            snakesTurn(snakes, SNAKE_DIR_DOWN);
+            if (!paused)
+                snakesTurn(snakes, SNAKE_DIR_DOWN);
             break;
         case KEY_RIGHT: case 'l': case 'd':
-            snakesTurn(snakes, SNAKE_DIR_RIGHT);
+            if (!paused)
+                snakesTurn(snakes, SNAKE_DIR_RIGHT);
+            break;
+        case 'p':
+            paused = !paused;
+            break;
+        case 'q':
+            running = FALSE;
             break;
     }
 }
 
 void step()
 {
-    if (snakesAdvance(snakes)) {
+    if (!paused && isGameStep() && snakesAdvance(snakes)) {
         warn("snakesAdvance failed", "");
     }
 }
 
 void draw()
 {
-    clear();
-    if (snakesDraw(snakes, &layers[LAYER_SNAKE])) {
-        warn("snakesDraw failed", "out-of-bounds snake");
-    }
-    for (int i = 0; i < LAYER_COUNT; i++) {
-        for (int j = 0; j < layers[i].h; j++) {
-            for (int k = 0; k < layers[i].w; k++) {
-                if (layers[i].tile[j][k] != GAME_TILE_EMPTY) {
-                    attron(COLOR_PAIR(1 + layers[i].tile[j][k]));
-                    mvprintw(j, k * 2, "  ");
-                    attroff(COLOR_PAIR(1 + layers[i].tile[j][k]));
+    if (isGameStep) {
+        clear();
+        if (snakesDraw(snakes, &layers[LAYER_SNAKE])) {
+            warn("snakesDraw failed", "out-of-bounds snake");
+        }
+        for (int i = 0; i < LAYER_COUNT; i++) {
+            for (int j = 0; j < layers[i].h; j++) {
+                for (int k = 0; k < layers[i].w; k++) {
+                    if (layers[i].tile[j][k] != GAME_TILE_EMPTY) {
+                        attron(COLOR_PAIR(1 + layers[i].tile[j][k]));
+                        mvprintw(j, k * 2, "  ");
+                        attroff(COLOR_PAIR(1 + layers[i].tile[j][k]));
+                    }
                 }
             }
         }
+        refresh();
+        if (windowsDraw(windows)) {
+            die("windowsDraw error", "returned non-zero");
+        }
+        refresh();
     }
-    refresh();
-    if (windowsDraw(windows)) {
-        die("windowsDraw error", "returned non-zero");
-    }
-    refresh();
 }
 
 void clean()
@@ -197,9 +216,16 @@ int isKeyValid(int ch)
         case 'k'   : case 'h'     : case 'j'     : case 'l'      :
         case 'w'   : case 'a'     : case 's'     : case 'd'      :
             return 1;
+        case 'q': case 'p':
+            return 2;
         default:
             return 0;
     }
+}
+
+int isGameStep()
+{
+    return (speedstep <= 0);
 }
 
 int main(int argc, char **argv)
@@ -209,10 +235,14 @@ int main(int argc, char **argv)
     // Enter game loop
     running = 1;
     while(running) {
+        speedstep = (paused ? 0 : speedstep - 1);
+
         listen();
         step();
         draw();
         clean();
+
+        speedstep = (speedstep <= 0 ? FPS - speed + 1: speedstep);
         usleep(1000000 / FPS);
     }
 

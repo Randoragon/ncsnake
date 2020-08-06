@@ -19,7 +19,7 @@ typedef enum {
 } Layer;
 
 // Variables
-int running;
+int running, paused, speed, speedstep, foodcount;
 GameStage layers[LAYER_COUNT];
 Windows *windows;
 Snake *snakes;
@@ -35,6 +35,7 @@ void clean();
 void cleanup();
 void showMsg(char *msg);
 int  isKeyValid(int ch);
+int  isGameStep();
 int  main(int argc, char **argv);
 
 #endif

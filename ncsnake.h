@@ -7,6 +7,11 @@
 #define MIN(x, y) (((x) > (y)) ? (y) : (x))
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
+/* Order here goes from bottom to top.
+ * Enumeration must start from 0 and
+ * LAYER_COUNT must be last for it to
+ * represent the total number of LAYERS.
+ */
 typedef enum {
     LAYER_WALL,
     LAYER_SNAKE,

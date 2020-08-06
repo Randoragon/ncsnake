@@ -40,6 +40,7 @@ void init()
     noecho();
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
+    curs_set(0);
 
     // Initialize game stage grid and set it to empty
     for (int i = 0; i < LAYER_COUNT; i++) {

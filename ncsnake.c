@@ -12,11 +12,11 @@
 // Implementations
 void die(char *msg, char *err)
 {
+    cleanup();
     if (*err)
         fprintf(stderr, "[err] ncsnake: %s: %s\n", msg, err);
     else
         fprintf(stderr, "[err] ncsnake: %s\n", msg);
-    cleanup();
     exit(EXIT_FAILURE);
 }
 

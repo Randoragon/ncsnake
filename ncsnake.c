@@ -137,8 +137,21 @@ void listen()
 
 void step()
 {
-    if (!paused && isGameStep() && snakesAdvance(snakes)) {
-        warn("snakesAdvance failed", "");
+    if (!paused && isGameStep()) {
+        // Calculate new snake positions
+        if (snakesAdvance(snakes)) {
+            warn("snakesAdvance failed", "");
+        }
+
+        // Check for collisions
+        if (snakesCollision(snakes, layers, LAYER_COUNT)) {
+            printf("collision detected\n");
+        }
+
+        // Update snake positions
+        if (snakesUpdate(snakes)) {
+            die("snakesUpdate failed", "snakeSegCopy returned non-zero");
+        }
     }
 }
 

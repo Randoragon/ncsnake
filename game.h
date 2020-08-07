@@ -48,7 +48,20 @@ typedef struct SnakeSegment {
 } SnakeSegment;
 
 typedef struct Snake {
-    SnakeSegment *head;
+    /* To make things simple for collision checking,
+     * the following steps are taken on each game step:
+     *      1) calculate new snake positions
+     *      2) resolve resulting collisions (if any)
+     *      3) actually move the snakes (and draw)
+     * This system removes the need to do complicated
+     * and possibly buggy checking WITHOUT having moved
+     * the snakes. The downside is, we need to store
+     * two snake positions in every snake, hence the
+     * two SnakeSegment linked lists (*head is the
+     * real-time position, *newhead is the future
+     * position used for collision checks).
+     */
+    SnakeSegment *head, *newhead;
     SnakeDir dir;
     SnakeState state;
     int growth;
@@ -59,13 +72,17 @@ typedef struct Snake {
 Snake *snakesInit();
 void  snakesFree(Snake *snakes);
 int   snakeCreate(Snake *snakes, SnakeCoords *coords, size_t coordslen, SnakeDir dir);
+SnakeSegment *snakeSegCreate(SnakeCoords *coords, size_t coordslen);
 Snake *snakeRemove(Snake *snakes, Snake *snake);
-int   snakeGrow(Snake *snake, unsigned int y, unsigned int x);
 void  snakesTurn(Snake *snakes, SnakeDir dir);
 int   snakesAdvance(Snake *snakes);
+int   snakesCollision(Snake *snakes, GameStage *stages, size_t stagec);
+int   snakesUpdate(Snake *snakes);
 int   snakesDraw(Snake *snake, GameStage *stage);
 int   snakesUndraw(Snake *snakes, GameStage *stage);
+int   snakeSegGrow(SnakeSegment *segments, unsigned int y, unsigned int x);
 void  snakeSegFree(SnakeSegment *head);
+int   snakeSegCopy(SnakeSegment *dest, SnakeSegment *src);
 int  gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
 void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);
 void gameStageSetDefault(GameStage *stage);

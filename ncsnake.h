@@ -20,11 +20,13 @@ typedef enum {
 
 // Variables
 int running, paused, speed, speedstep, foodcount;
+unsigned long long tick;
 GameStage layers[LAYER_COUNT];
 Windows *windows;
 Snake *snakes;
 
 // Forward declarations
+void timestamp(char *str);
 void die(char *msg, char *err);
 void warn(char *msg, char *err);
 void init();

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #include "ncsnake.h"
 #include "game.h"
@@ -10,13 +11,24 @@
 #define KEYBUF_SIZE 21 /* see the listen() function implementation */
 
 // Implementations
+void timestamp(char *str)
+{
+    time_t lt;
+    struct tm *t;
+    lt = time(NULL);
+    t = localtime(&lt);
+    sprintf(str, "%02d:%02d:%02d", t->tm_hour, t->tm_min, t->tm_sec);
+}
+
 void die(char *msg, char *err)
 {
     cleanup();
+    char stamp[10];
+    timestamp(stamp);
     if (*err)
-        fprintf(stderr, "[err] ncsnake: %s: %s\n", msg, err);
+        fprintf(stderr, "[%s %llu] [err] ncsnake: %s: %s\n", stamp, tick, msg, err);
     else
-        fprintf(stderr, "[err] ncsnake: %s\n", msg);
+        fprintf(stderr, "[%s %llu] [err] ncsnake: %s\n", stamp, tick, msg);
     exit(EXIT_FAILURE);
 }
 
@@ -24,10 +36,12 @@ void warn(char *msg, char *err)
 {
     def_prog_mode();
     endwin();
+    char stamp[10];
+    timestamp(stamp);
     if (*err)
-        fprintf(stderr, "[warn] ncsnake: %s: %s\n", msg, err);
+        fprintf(stderr, "[%s %llu] [warn] ncsnake: %s: %s\n", stamp, tick, msg, err);
     else
-        fprintf(stderr, "[warn] ncsnake: %s\n", msg);
+        fprintf(stderr, "[%s %llu] [warn] ncsnake: %s\n", stamp, tick, msg);
     reset_prog_mode();
     refresh();
 }
@@ -141,7 +155,7 @@ void listen()
 
 void step()
 {
-    if (!paused && isGameStep()) {
+    if (!paused) {
         // Calculate new snake positions
         if (snakesAdvance(snakes)) {
             warn("snakesAdvance failed", "");
@@ -161,28 +175,26 @@ void step()
 
 void draw()
 {
-    if (isGameStep) {
-        clear();
-        if (snakesDraw(snakes, &layers[LAYER_SNAKE])) {
-            warn("snakesDraw failed", "out-of-bounds snake");
-        }
-        for (int i = 0; i < LAYER_COUNT; i++) {
-            for (int j = 0; j < layers[i].h; j++) {
-                for (int k = 0; k < layers[i].w; k++) {
-                    if (layers[i].tile[j][k] != GAME_TILE_EMPTY) {
-                        attron(COLOR_PAIR(1 + layers[i].tile[j][k]));
-                        mvprintw(j, k * 2, "  ");
-                        attroff(COLOR_PAIR(1 + layers[i].tile[j][k]));
-                    }
+    clear();
+    if (snakesDraw(snakes, &layers[LAYER_SNAKE])) {
+        warn("snakesDraw failed", "out-of-bounds snake");
+    }
+    for (int i = 0; i < LAYER_COUNT; i++) {
+        for (int j = 0; j < layers[i].h; j++) {
+            for (int k = 0; k < layers[i].w; k++) {
+                if (layers[i].tile[j][k] != GAME_TILE_EMPTY) {
+                    attron(COLOR_PAIR(1 + layers[i].tile[j][k]));
+                    mvprintw(j, k * 2, "  ");
+                    attroff(COLOR_PAIR(1 + layers[i].tile[j][k]));
                 }
             }
         }
-        refresh();
-        if (windowsDraw(windows)) {
-            die("windowsDraw error", "returned non-zero");
-        }
-        refresh();
     }
+    refresh();
+    if (windowsDraw(windows)) {
+        die("windowsDraw error", "returned non-zero");
+    }
+    refresh();
 }
 
 void clean()
@@ -247,20 +259,25 @@ int isGameStep()
 
 int main(int argc, char **argv)
 {
+    tick = 1;
     init();
 
     // Enter game loop
     running = 1;
+    draw();
     while(running) {
         speedstep = (paused ? 0 : speedstep - 1);
 
         listen();
-        step();
-        draw();
-        clean();
+        if (isGameStep()) {
+            step();
+            draw();
+            clean();
+        }
 
         speedstep = (speedstep <= 0 ? FPS - speed + 1: speedstep);
         usleep(1000000 / FPS);
+        tick++;
     }
 
     // Cleanup

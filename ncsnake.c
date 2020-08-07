@@ -22,10 +22,14 @@ void die(char *msg, char *err)
 
 void warn(char *msg, char *err)
 {
+    def_prog_mode();
+    endwin();
     if (*err)
         fprintf(stderr, "[warn] ncsnake: %s: %s\n", msg, err);
     else
         fprintf(stderr, "[warn] ncsnake: %s\n", msg);
+    reset_prog_mode();
+    refresh();
 }
 
 void init()

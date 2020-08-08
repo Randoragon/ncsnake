@@ -21,9 +21,17 @@ typedef enum {
     LAYER_COUNT
 } Layer;
 
+typedef enum {
+    KEYBUF_KEY_NONE = 0,
+    KEYBUF_KEY_UP,
+    KEYBUF_KEY_LEFT,
+    KEYBUF_KEY_DOWN,
+    KEYBUF_KEY_RIGHT
+} KeybufKey;
+
 // Variables
 int running, paused, speed, speedstep, foodcount;
-int keybuf[KEYBUF_SIZE];
+KeybufKey keybuf[KEYBUF_SIZE];
 unsigned long long tick;
 GameStage layers[LAYER_COUNT];
 Windows *windows;
@@ -41,11 +49,9 @@ void draw();
 void clean();
 void cleanup();
 void showMsg(char *msg);
-int  isKeyValid(int ch);
 int  isGameStep();
 void keybufPush(int key);
-int  keybufPop();
-int  keybufTail();
+KeybufKey keybufPop();
 int  main(int argc, char **argv);
 
 #endif

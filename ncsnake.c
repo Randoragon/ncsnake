@@ -138,9 +138,7 @@ void listen()
                  * key presses will not be registered until some space has been cleared.
                  * keybuf shrinks by 1 keypress every game step (unless the buffer is empty).
                  */
-                if (isKeyValid(ch) && keybufTail() != ch) {
-                    keybufPush(ch);
-                }
+                keybufPush(ch);
                 break;
         }
     }
@@ -151,21 +149,23 @@ void step()
     if (!paused) {
         // Turn the snakes if appropriate
         switch(keybufPop()) {
-            case KEY_UP: case 'k': case 'w':
+            case KEYBUF_KEY_UP:
                 if (!paused)
                     snakesTurn(snakes, SNAKE_DIR_UP);
                 break;
-            case KEY_LEFT: case 'h': case 'a':
+            case KEYBUF_KEY_LEFT:
                 if (!paused)
                     snakesTurn(snakes, SNAKE_DIR_LEFT);
                 break;
-            case KEY_DOWN: case 'j': case 's':
+            case KEYBUF_KEY_DOWN:
                 if (!paused)
                     snakesTurn(snakes, SNAKE_DIR_DOWN);
                 break;
-            case KEY_RIGHT: case 'l': case 'd':
+            case KEYBUF_KEY_RIGHT:
                 if (!paused)
                     snakesTurn(snakes, SNAKE_DIR_RIGHT);
+                break;
+            case KEYBUF_KEY_NONE:
                 break;
         }
 
@@ -251,20 +251,6 @@ void showMsg(char *msg)
     }
 }
 
-int isKeyValid(int ch)
-{
-    switch(ch) {
-        case KEY_UP: case KEY_LEFT: case KEY_DOWN: case KEY_RIGHT:
-        case 'k'   : case 'h'     : case 'j'     : case 'l'      :
-        case 'w'   : case 'a'     : case 's'     : case 'd'      :
-            return 1;
-        case 'q': case 'p':
-            return 2;
-        default:
-            return 0;
-    }
-}
-
 int isGameStep()
 {
     return (speedstep <= 0);
@@ -273,27 +259,51 @@ int isGameStep()
 void keybufPush(int key)
 {
     int i;
-    for (i = 0; i < KEYBUF_SIZE && keybuf[i]; i++);
+    for (i = 0; i < KEYBUF_SIZE && keybuf[i] != KEYBUF_KEY_NONE; i++);
     if (i < KEYBUF_SIZE) {
-        keybuf[i] = key;
+        // Convert key code to KeybufKey
+        KeybufKey k;
+        switch (key) {
+            case KEY_UP: case 'k': case 'w': 
+                k = KEYBUF_KEY_UP;
+                break;
+            case KEY_LEFT: case 'h': case 'a': 
+                k = KEYBUF_KEY_LEFT;
+                break;
+            case KEY_DOWN: case 'j': case 's': 
+                k = KEYBUF_KEY_DOWN;
+                break;
+            case KEY_RIGHT: case 'l': case 'd':
+                k = KEYBUF_KEY_RIGHT;
+                break;
+            default:
+                k = KEYBUF_KEY_NONE;
+                break;
+        }
+
+        // Filter out superfluous keys
+        int flags;
+        flags = (k == KEYBUF_KEY_NONE) |
+                (i && keybuf[i - 1] == k) |
+                (i && keybuf[i - 1] == KEYBUF_KEY_UP    && k == KEYBUF_KEY_DOWN ) |
+                (i && keybuf[i - 1] == KEYBUF_KEY_LEFT  && k == KEYBUF_KEY_RIGHT) |
+                (i && keybuf[i - 1] == KEYBUF_KEY_DOWN  && k == KEYBUF_KEY_UP   ) |
+                (i && keybuf[i - 1] == KEYBUF_KEY_RIGHT && k == KEYBUF_KEY_LEFT );
+        if (flags)
+            return;
+
+        keybuf[i] = k;
     } else {
         debug("keybufPush", "input buffer is full");
     }
 }
 
-int keybufPop()
+KeybufKey keybufPop()
 {
-    int ret = keybuf[0];
+    KeybufKey ret = keybuf[0];
     memcpy(keybuf, keybuf + 1, (KEYBUF_SIZE - 1) * sizeof(keybuf[0]));
-    keybuf[KEYBUF_SIZE - 1] = 0;
+    keybuf[KEYBUF_SIZE - 1] = KEYBUF_KEY_NONE;
     return ret;
-}
-
-int keybufTail()
-{
-    int i;
-    for (i = 0; i < KEYBUF_SIZE && keybuf[i]; i++);
-    return (i ? keybuf[i - 1] : 0);
 }
 
 int main(int argc, char **argv)

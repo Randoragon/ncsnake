@@ -7,9 +7,6 @@
 #include "ncsnake.h"
 #include "game.h"
 
-#define FPS 60
-#define KEYBUF_SIZE 21 /* see the listen() function implementation */
-
 // Implementations
 void timestamp(char *str)
 {
@@ -44,6 +41,22 @@ void warn(char *msg, char *err)
         fprintf(stderr, "[%s %llu] [warn] ncsnake: %s\n", stamp, tick, msg);
     reset_prog_mode();
     refresh();
+}
+
+void debug(char *msg, char *err)
+{
+#ifdef DEBUG
+    def_prog_mode();
+    endwin();
+    char stamp[10];
+    timestamp(stamp);
+    if (*err)
+        fprintf(stderr, "[%s %llu] [debug] ncsnake: %s: %s\n", stamp, tick, msg, err);
+    else
+        fprintf(stderr, "[%s %llu] [debug] ncsnake: %s\n", stamp, tick, msg);
+    reset_prog_mode();
+    refresh();
+#endif
 }
 
 void init()
@@ -102,60 +115,60 @@ void init()
     speedstep = FPS * 1; /* wait 1 second before starting the game */
     foodcount = 1;
     paused = 0;
+    memset(&keybuf, 0, KEYBUF_SIZE * sizeof(keybuf[0]));
 }
 
 void listen()
 {
-    /* Allow input buffering, but only for different consecutive presses!
-     * The size-1 of the keyboard buffer determines how many keys can be pressed
-     * in one game frame (FPS) before input delay kicks in.
-     */
-    int keybuf[KEYBUF_SIZE] = {0};
-    int ch, i = 1;
+    int ch;
     while ((ch = getch()) != ERR) {
-        if (isKeyValid(ch) && keybuf[i-1] != ch) {
-            keybuf[i++] = ch;
+        switch(ch) {
+            case 'q':
+                running = FALSE;
+                break;
+            case 'p':
+                paused = !paused;
+                break;
+            default:
+                /* Allow input buffering, but only for different consecutive presses!
+                 * KEYBUF_SIZE determines how many keys can be queued up simultaneously,
+                 * meaning if you press a combination of snake movements very quickly,
+                 * up to KEYBUF_SIZE keypresses will be remembered and executed one
+                 * by one in the following game steps. If buffer fills completely, your
+                 * key presses will not be registered until some space has been cleared.
+                 * keybuf shrinks by 1 keypress every game step (unless the buffer is empty).
+                 */
+                if (isKeyValid(ch) && keybufTail() != ch) {
+                    keybufPush(ch);
+                }
+                break;
         }
-        if (i >= KEYBUF_SIZE) {
-            break;
-        }
-    }
-
-    // Re-enqueue the captured keys
-    for (i = KEYBUF_SIZE - 1; i-- > 0;) {
-        if (keybuf[i])
-            ungetch(keybuf[i]);
-    }
-
-    switch(getch()) {
-        case KEY_UP: case 'k': case 'w':
-            if (!paused)
-                snakesTurn(snakes, SNAKE_DIR_UP);
-            break;
-        case KEY_LEFT: case 'h': case 'a':
-            if (!paused)
-                snakesTurn(snakes, SNAKE_DIR_LEFT);
-            break;
-        case KEY_DOWN: case 'j': case 's':
-            if (!paused)
-                snakesTurn(snakes, SNAKE_DIR_DOWN);
-            break;
-        case KEY_RIGHT: case 'l': case 'd':
-            if (!paused)
-                snakesTurn(snakes, SNAKE_DIR_RIGHT);
-            break;
-        case 'p':
-            paused = !paused;
-            break;
-        case 'q':
-            running = FALSE;
-            break;
     }
 }
 
 void step()
 {
     if (!paused) {
+        // Turn the snakes if appropriate
+        switch(keybufPop()) {
+            case KEY_UP: case 'k': case 'w':
+                if (!paused)
+                    snakesTurn(snakes, SNAKE_DIR_UP);
+                break;
+            case KEY_LEFT: case 'h': case 'a':
+                if (!paused)
+                    snakesTurn(snakes, SNAKE_DIR_LEFT);
+                break;
+            case KEY_DOWN: case 'j': case 's':
+                if (!paused)
+                    snakesTurn(snakes, SNAKE_DIR_DOWN);
+                break;
+            case KEY_RIGHT: case 'l': case 'd':
+                if (!paused)
+                    snakesTurn(snakes, SNAKE_DIR_RIGHT);
+                break;
+        }
+
         // Calculate new snake positions
         if (snakesAdvance(snakes)) {
             warn("snakesAdvance failed", "");
@@ -255,6 +268,32 @@ int isKeyValid(int ch)
 int isGameStep()
 {
     return (speedstep <= 0);
+}
+
+void keybufPush(int key)
+{
+    int i;
+    for (i = 0; i < KEYBUF_SIZE && keybuf[i]; i++);
+    if (i < KEYBUF_SIZE) {
+        keybuf[i] = key;
+    } else {
+        debug("keybufPush", "input buffer is full");
+    }
+}
+
+int keybufPop()
+{
+    int ret = keybuf[0];
+    memcpy(keybuf, keybuf + 1, (KEYBUF_SIZE - 1) * sizeof(keybuf[0]));
+    keybuf[KEYBUF_SIZE - 1] = 0;
+    return ret;
+}
+
+int keybufTail()
+{
+    int i;
+    for (i = 0; i < KEYBUF_SIZE && keybuf[i]; i++);
+    return (i ? keybuf[i - 1] : 0);
 }
 
 int main(int argc, char **argv)

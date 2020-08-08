@@ -239,9 +239,24 @@ int snakesAdvance(Snake *snakes)
 int snakesCollision(Snake *snakes, GameStage *stages, size_t stagec)
 {
     for (Snake *s = snakes; s; s = s->next) {
+        SnakeState state = s->state;
         for (int i = 0; i < stagec; i++) {
+            int x, y;
+            x = s->newhead->x;
+            y = s->newhead->y;
             GameStage st = stages[i];
+            if (x < 0 || x >= st.w || y < 0 || y >= st.h) {
+                return 1;
+            }
+            switch(st.tile[y][x]) {
+                case GAME_TILE_WALL: case GAME_TILE_SNAKE_HEAD: case GAME_TILE_SNAKE_BODY:
+                    state = SNAKE_STATE_DEAD;
+                    break;
+                default:
+                    break;
+            }
         }
+        s->state = state;
     }
     return 0;
 }
@@ -249,8 +264,10 @@ int snakesCollision(Snake *snakes, GameStage *stages, size_t stagec)
 int snakesUpdate(Snake *snakes)
 {
     for (Snake *s = snakes; s; s = s->next) {
-        if (snakeSegCopy(s->head, s->newhead)) {
-            return 1;
+        if (s->state == SNAKE_STATE_ALIVE) {
+            if (snakeSegCopy(s->head, s->newhead)) {
+                return 1;
+            }
         }
     }
     return 0;

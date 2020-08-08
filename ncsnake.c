@@ -262,9 +262,16 @@ int main(int argc, char **argv)
     tick = 1;
     init();
 
+    // Countdown
+    draw();
+    while (speedstep--) {
+        usleep(1000000 / FPS);
+        tick++;
+    }
+    clean();
+
     // Enter game loop
     running = 1;
-    draw();
     while(running) {
         speedstep = (paused ? 0 : speedstep - 1);
 

@@ -79,7 +79,6 @@ int   snakesAdvance(Snake *snakes);
 int   snakesCollision(Snake *snakes, GameStage *stages, size_t stagec);
 int   snakesUpdate(Snake *snakes);
 int   snakesDraw(Snake *snake, GameStage *stage);
-int   snakesUndraw(Snake *snakes, GameStage *stage);
 int   snakeSegGrow(SnakeSegment *segments, unsigned int y, unsigned int x);
 void  snakeSegFree(SnakeSegment *head);
 int   snakeSegCopy(SnakeSegment *dest, SnakeSegment *src);

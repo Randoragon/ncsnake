@@ -195,7 +195,7 @@ void step()
 
         // Check for collisions
         if (snakesCollision(snakes, layers, LAYER_COUNT)) {
-            printf("collision detected\n");
+            warn("snakeCollision failed", "out-of-bounds snake");
         }
 
         // Update snake positions

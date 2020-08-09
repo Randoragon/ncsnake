@@ -60,8 +60,7 @@ void windowsPop(Windows *windows, int runhook)
     Windows *prev = NULL, *last;
     for (last = windows; last && last->next; prev = last, last = last->next);
     if (last) {
-        if (runhook && last->hook)
-            last->hook();
+        void (*hook)() = last->hook;
 
         delwin(last->win);
 
@@ -72,6 +71,9 @@ void windowsPop(Windows *windows, int runhook)
             windows->win = NULL;
             windows->next = NULL;
         }
+
+        if (runhook && hook)
+            hook();
     }
 }
 

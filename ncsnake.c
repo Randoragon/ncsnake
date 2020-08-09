@@ -134,6 +134,7 @@ void listen()
                     } else {
                         paused = TRUE;
                         showMsg("PAUSE", msghookUnpause);
+                        draw();
                     }
                 }
                 break;
@@ -226,14 +227,6 @@ void draw()
     if (windowsDraw(windows)) {
         die("windowsDraw error", "returned non-zero");
     }
-    refresh();
-}
-
-void clean()
-{
-    if (snakesUndraw(snakes, &layers[LAYER_SNAKE])) {
-        warn("snakesUndraw failed", "out-of-bounds snake");
-    }
 }
 
 void cleanup()
@@ -284,16 +277,16 @@ void keybufPush(int key)
         KeybufKey k;
         switch (key) {
             case KEY_UP: case 'k': case 'w': 
-                k = KEYBUF_KEY_UP;
+                k = (paused ? KEYBUF_KEY_NONE : KEYBUF_KEY_UP);
                 break;
             case KEY_LEFT: case 'h': case 'a': 
-                k = KEYBUF_KEY_LEFT;
+                k = (paused ? KEYBUF_KEY_NONE : KEYBUF_KEY_LEFT);
                 break;
             case KEY_DOWN: case 'j': case 's': 
-                k = KEYBUF_KEY_DOWN;
+                k = (paused ? KEYBUF_KEY_NONE : KEYBUF_KEY_DOWN);
                 break;
             case KEY_RIGHT: case 'l': case 'd':
-                k = KEYBUF_KEY_RIGHT;
+                k = (paused ? KEYBUF_KEY_NONE : KEYBUF_KEY_RIGHT);
                 break;
             default:
                 k = KEYBUF_KEY_NONE;
@@ -336,18 +329,16 @@ int main(int argc, char **argv)
         usleep(1000000 / FPS);
         tick++;
     }
-    clean();
 
     // Enter game loop
     running = TRUE;
     while(running) {
-        speedstep = (paused ? 0 : speedstep - 1);
+        speedstep -= (paused == FALSE);
 
         listen();
-        if (isGameStep()) {
+        if (isGameStep() && !paused) {
             step();
             draw();
-            clean();
         }
 
         speedstep = (speedstep <= 0 ? FPS - speed + 1: speedstep);
@@ -364,6 +355,7 @@ int main(int argc, char **argv)
 void msghookUnpause()
 {
     paused = FALSE;
+    draw();
 }
 
 void msghookGameOver()

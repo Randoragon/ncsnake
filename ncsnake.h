@@ -46,7 +46,6 @@ void init();
 void listen();
 void step();
 void draw();
-void clean();
 void cleanup();
 void showMsg(char *msg, void (*hook)());
 void msghookUnpause();

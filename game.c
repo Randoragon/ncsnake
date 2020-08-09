@@ -275,6 +275,7 @@ int snakesUpdate(Snake *snakes)
 
 int snakesDraw(Snake *snakes, GameStage *stage)
 {
+    gameStageFill(stage, stage->h, stage->w, 0, 0, GAME_TILE_EMPTY);
     for (Snake *s = snakes; s; s = s->next) {
         int ishead = 1;
         for (SnakeSegment *seg = s->head; seg; seg = seg->next) {
@@ -283,19 +284,6 @@ int snakesDraw(Snake *snakes, GameStage *stage)
             }
             stage->tile[seg->y][seg->x] = (ishead ? GAME_TILE_SNAKE_HEAD : GAME_TILE_SNAKE_BODY);
             ishead = 0;
-        }
-    }
-    return 0;
-}
-
-int snakesUndraw(Snake *snakes, GameStage *stage)
-{
-    for (Snake *s = snakes; s; s = s->next) {
-        for (SnakeSegment *seg = s->head; seg; seg = seg->next) {
-            if (seg->y >= stage->h || seg->x >= stage->w) {
-                return 1;
-            }
-            stage->tile[seg->y][seg->x] = GAME_TILE_EMPTY;
         }
     }
     return 0;

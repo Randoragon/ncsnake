@@ -29,8 +29,15 @@ typedef enum {
     KEYBUF_KEY_RIGHT
 } KeybufKey;
 
+typedef enum {
+    GAME_STATE_COUNTDOWN,
+    GAME_STATE_PLAYING,
+    GAME_STATE_DEAD
+} GameState;
+
 // Variables
-int running, gameover, paused, speed, speedstep, foodcount;
+int running, paused, speed, speedstep, foodcount;
+GameState gamestate;
 KeybufKey keybuf[KEYBUF_SIZE];
 unsigned long long tick;
 GameStage layers[LAYER_COUNT];
@@ -53,6 +60,7 @@ void msghookGameOver();
 int  isGameStep();
 void keybufPush(int key);
 KeybufKey keybufPop();
+void dumpInput();
 int  main(int argc, char **argv);
 
 #endif

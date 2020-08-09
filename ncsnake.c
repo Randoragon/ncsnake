@@ -116,7 +116,7 @@ void init()
     foodcount = 1;
     paused = FALSE;
     memset(&keybuf, 0, KEYBUF_SIZE * sizeof(keybuf[0]));
-    gameover = FALSE;
+    gamestate = GAME_STATE_COUNTDOWN;
 }
 
 void listen()
@@ -128,7 +128,7 @@ void listen()
                 running = FALSE;
                 break;
             case 'p':
-                if (!gameover) {
+                if (gamestate == GAME_STATE_PLAYING) {
                     if (paused) {
                         windowsPop(windows, 1);
                     } else {
@@ -200,7 +200,7 @@ void step()
         Snake *s;
         for (s = snakes; s && s->state != SNAKE_STATE_DEAD; s = s->next);
         if (s) {
-            gameover = TRUE;
+            gamestate = GAME_STATE_DEAD;
             showMsg("GAME OVER", msghookGameOver);
         }
     }
@@ -318,6 +318,11 @@ KeybufKey keybufPop()
     return ret;
 }
 
+void dumpInput()
+{
+    while (getch() != ERR);
+}
+
 int main(int argc, char **argv)
 {
     tick = 1;
@@ -331,9 +336,11 @@ int main(int argc, char **argv)
     }
 
     // Enter game loop
+    dumpInput();
     running = TRUE;
+    gamestate = GAME_STATE_PLAYING;
     while(running) {
-        speedstep -= (paused == FALSE);
+        speedstep -= !(paused || gamestate == GAME_STATE_DEAD);
 
         listen();
         if (isGameStep() && !paused) {

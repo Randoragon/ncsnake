@@ -11,10 +11,11 @@ Windows *windowsInit()
     }
     windows->win  = NULL;
     windows->next = NULL;
+    windows->hook = NULL;
     return windows;
 }
 
-WINDOW *windowsLink(Windows *windows, char *caption, int height, int width, int starty, int startx)
+WINDOW *windowsPush(Windows *windows, char *caption, int height, int width, int starty, int startx, void (*hook)())
 {
     if (!windows)
         return NULL;
@@ -48,32 +49,29 @@ WINDOW *windowsLink(Windows *windows, char *caption, int height, int width, int 
     }
     new->win   = win;
     strcpy(new->caption, caption);
+    new->hook  = hook;
     new->next  = NULL;
 
     return win;
 }
 
-void windowsUnlink(Windows *windows, WINDOW *win)
+void windowsPop(Windows *windows, int runhook)
 {
-    Windows *prev = NULL, *found;
-    for (found = windows; found && found->win != win; prev = found, found = found->next);
-    if (found) {
-        if (prev) {
-            prev->next = found->next;
-        } else {
-            if (found->next) {
-                windows->win = found->next->win;
-                windows->next = found->next->next;
-            } else {
-                windows->win = NULL;
-                windows->next = NULL;
-            }
-        }
+    Windows *prev = NULL, *last;
+    for (last = windows; last && last->next; prev = last, last = last->next);
+    if (last) {
+        if (runhook && last->hook)
+            last->hook();
 
-        if (found->win) {
-            free(found->win);
+        delwin(last->win);
+
+        if (prev) {
+            prev->next = NULL;
+            free(last);
+        } else {
+            windows->win = NULL;
+            windows->next = NULL;
         }
-        free(found);
     }
 }
 
@@ -97,36 +95,41 @@ int windowsDraw(Windows *windows)
     if (!windows)
         return 0;
 
-    for (Windows *w = windows; w; w = w->next) {
-        if (w->win) {
-            int hwin, wwin, linec = 1, curline;
-            char token[] = "\n", *line, *lines;
+    // Only draw the last (topmost) window
+    Windows *w;
+    for (w = windows; w && w->next; w = w->next);
+    if (w->win) {
+        int hwin, wwin, linec = 1, curline;
+        char token[] = "\n", *line, *lines;
 
-            getmaxyx(w->win, hwin, wwin);
-            for (char *c = w->caption; *c; linec += (*c++ == '\n'));
+        getmaxyx(w->win, hwin, wwin);
+        for (char *c = w->caption; *c; linec += (*c++ == '\n'));
 
-            // strtok modifies the original string, create a temporary copy;
-            if (!(lines = (char *)malloc(sizeof(char) * strlen(w->caption)))) {
-                return 1;
-            }
-            strcpy(lines, w->caption);
-
-            // print each caption line centered in the right place
-            line = strtok(lines, token);
-            curline = (hwin - linec) / 2;
-            while (line) {
-                int hpos = (wwin - strlen(line)) / 2;
-                mvwprintw(w->win, curline++, hpos, "%s", line);
-                line = strtok(NULL, token);
-            }
-            free(lines);
-
-            // Draw box outline
-            box(w->win, 0, 0);
-            
-            wrefresh(w->win);
+        // strtok modifies the original string, create a temporary copy;
+        if (!(lines = (char *)malloc(sizeof(char) * strlen(w->caption)))) {
+            return 1;
         }
+        strcpy(lines, w->caption);
+
+        // print each caption line centered in the right place
+        line = strtok(lines, token);
+        curline = (hwin - linec) / 2;
+        while (line) {
+            int hpos = (wwin - strlen(line)) / 2;
+            mvwprintw(w->win, curline++, hpos, "%s", line);
+            line = strtok(NULL, token);
+        }
+        free(lines);
+
+        // Draw box outline
+        box(w->win, 0, 0);
+        
+        wrefresh(w->win);
     }
     return 0;
 }
 
+int windowsExist(Windows *windows)
+{
+    return (windows ? (windows->win != NULL) : 0);
+}

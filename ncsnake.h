@@ -30,7 +30,7 @@ typedef enum {
 } KeybufKey;
 
 // Variables
-int running, paused, speed, speedstep, foodcount;
+int running, gameover, paused, speed, speedstep, foodcount;
 KeybufKey keybuf[KEYBUF_SIZE];
 unsigned long long tick;
 GameStage layers[LAYER_COUNT];
@@ -48,7 +48,9 @@ void step();
 void draw();
 void clean();
 void cleanup();
-void showMsg(char *msg);
+void showMsg(char *msg, void (*hook)());
+void msghookUnpause();
+void msghookGameOver();
 int  isGameStep();
 void keybufPush(int key);
 KeybufKey keybufPop();

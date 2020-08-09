@@ -114,8 +114,9 @@ void init()
     speed = 45;
     speedstep = FPS * 1; /* wait 1 second before starting the game */
     foodcount = 1;
-    paused = 0;
+    paused = FALSE;
     memset(&keybuf, 0, KEYBUF_SIZE * sizeof(keybuf[0]));
+    gameover = FALSE;
 }
 
 void listen()
@@ -127,7 +128,17 @@ void listen()
                 running = FALSE;
                 break;
             case 'p':
-                paused = !paused;
+                if (!gameover) {
+                    if (paused) {
+                        windowsPop(windows, 1);
+                    } else {
+                        paused = TRUE;
+                        showMsg("PAUSE", msghookUnpause);
+                    }
+                }
+                break;
+            case '\n':
+                windowsPop(windows, 1);
                 break;
             default:
                 /* Allow input buffering, but only for different consecutive presses!
@@ -146,7 +157,7 @@ void listen()
 
 void step()
 {
-    if (!paused) {
+    if (!paused && !windowsExist(windows)) {
         // Turn the snakes if appropriate
         switch(keybufPop()) {
             case KEYBUF_KEY_UP:
@@ -182,6 +193,14 @@ void step()
         // Update snake positions
         if (snakesUpdate(snakes)) {
             die("snakesUpdate failed", "snakeSegCopy returned non-zero");
+        }
+
+        // If any snakes are dead, it's game over
+        Snake *s;
+        for (s = snakes; s && s->state != SNAKE_STATE_DEAD; s = s->next);
+        if (s) {
+            gameover = TRUE;
+            showMsg("GAME OVER", msghookGameOver);
         }
     }
 }
@@ -224,7 +243,7 @@ void cleanup()
     endwin();
 }
 
-void showMsg(char *msg)
+void showMsg(char *msg, void (*hook)())
 {
     int y, x, w = 0, h, linec = 0;
     char token[] = "\n", *line, *lines;
@@ -246,8 +265,8 @@ void showMsg(char *msg)
     y = (LINES - h) / 2;
     x = (COLS - w) / 2;
 
-    if (!windowsLink(windows, msg, h, w, y, x)) {
-        die("showMsg error", "windowsLink returned non-zero");
+    if (!windowsPush(windows, msg, h, w, y, x, hook)) {
+        die("showMsg error", "windowsPush returned non-zero");
     }
 }
 
@@ -320,7 +339,7 @@ int main(int argc, char **argv)
     clean();
 
     // Enter game loop
-    running = 1;
+    running = TRUE;
     while(running) {
         speedstep = (paused ? 0 : speedstep - 1);
 
@@ -340,4 +359,14 @@ int main(int argc, char **argv)
     cleanup();
 
     return EXIT_SUCCESS;
+}
+
+void msghookUnpause()
+{
+    paused = FALSE;
+}
+
+void msghookGameOver()
+{
+    running = FALSE;
 }

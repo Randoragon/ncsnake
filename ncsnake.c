@@ -113,10 +113,17 @@ void init()
     // Set game variables
     speed = 45;
     speedstep = FPS * 1; /* wait 1 second before starting the game */
-    foodcount = 1;
+    foodcount = 2;
     paused = FALSE;
     memset(&keybuf, 0, KEYBUF_SIZE * sizeof(keybuf[0]));
     gamestate = GAME_STATE_COUNTDOWN;
+
+    // Randomize seed
+    srand(time(NULL));
+
+    // Spawn first food
+    for (int i = 0; i < foodcount; i++)
+        spawnFood(layers, LAYER_COUNT, snakes, &layers[LAYER_WALL]);
 }
 
 void listen()

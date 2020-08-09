@@ -230,6 +230,7 @@ int snakesAdvance(Snake *snakes)
             // Append new segment in place of former last one if food was eaten
             if (s->growth) {
                 snakeSegGrow(s->newhead, ly, lx);
+                s->growth--;
             }
         }
     }
@@ -252,6 +253,10 @@ int snakesCollision(Snake *snakes, GameStage *stages, size_t stagec)
                 case GAME_TILE_WALL: case GAME_TILE_SNAKE_HEAD: case GAME_TILE_SNAKE_BODY:
                     state = SNAKE_STATE_DEAD;
                     break;
+                case GAME_TILE_FOOD:
+                    s->growth++;
+                    st.tile[y][x] = GAME_TILE_EMPTY;
+                    spawnFood(stages, stagec, snakes, &st);
                 default:
                     break;
             }
@@ -387,5 +392,38 @@ void gameStageSetDefault(GameStage *stage)
     gameStageFill(stage, 1, w - 2, 0, 1, GAME_TILE_WALL);
     gameStageFill(stage, 1, w - 2, h - 1, 1, GAME_TILE_WALL);
     gameStageFill(stage, h - 2, w - 2, 1, 1, GAME_TILE_EMPTY);
+}
+
+int coordsEmpty(GameStage *stages, size_t stagec, Snake *snakes, unsigned int y, unsigned int x)
+{
+    // Check all stages
+    for (int i = 0; i < stagec; i++) {
+        if (stages[i].tile[y][x] != GAME_TILE_EMPTY) {
+            return 0;
+        }
+    }
+
+    // Check all snakes
+    for (Snake *s = snakes; s; s = s->next) {
+        if (s->head) {
+            for (SnakeSegment *seg = s->head; seg; seg = seg->next) {
+                if (seg->x == x && seg->y == y) {
+                    return 0;
+                }
+            }
+        }
+    }
+
+    return 1;
+}
+
+void spawnFood(GameStage *stages, size_t stagec, Snake *snakes, GameStage *target)
+{
+    int x, y;
+    do {
+        x = 1 + (rand() % (stages[0].w - 2));
+        y = 1 + (rand() % (stages[0].h - 2));
+    } while (!coordsEmpty(stages, stagec, snakes, y, x));
+    target->tile[y][x] = GAME_TILE_FOOD;
 }
 

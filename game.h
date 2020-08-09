@@ -85,5 +85,7 @@ int   snakeSegCopy(SnakeSegment *dest, SnakeSegment *src);
 int  gameStageCreate(GameStage *stage, unsigned int h, unsigned int w);
 void gameStageFill(GameStage *stage, unsigned int h, unsigned int w, unsigned int y, unsigned int x, GameTile value);
 void gameStageSetDefault(GameStage *stage);
+int  coordsEmpty(GameStage *stages, size_t stagec, Snake *snakes, unsigned int y, unsigned int x);
+void spawnFood(GameStage *stages, size_t stagec, Snake *snakes, GameStage *target);
 
 #endif

@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-#define GAME_STAGE_MIN_W 4
-#define GAME_STAGE_MIN_H 4
+#define GAME_STAGE_MIN_W 10
+#define GAME_STAGE_MIN_H 8
 
 // Constants
 typedef enum {

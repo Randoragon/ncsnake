@@ -76,8 +76,12 @@ void init()
 
     // Initialize game stage grid and set it to empty
     for (int i = 0; i < LAYER_COUNT; i++) {
-        if (gameStageCreate(&layers[i], LINES, COLS / 2)) {
-            die("failed to create stage", "malloc failed");
+        switch (gameStageCreate(&layers[i], LINES, COLS / 2)) {
+            case 1:
+                die("failed to create stage", "malloc failed");
+                break;
+            case 2:
+                die("failed to create stage", "terminal too small");
         }
         gameStageFill(&layers[i], LINES, COLS / 2, 0, 0, GAME_TILE_EMPTY);
     }

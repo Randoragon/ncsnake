@@ -417,11 +417,22 @@ int coordsEmpty(GameStage *stages, size_t stagec, Snake *snakes, unsigned int y,
 
 void spawnFood(GameStage *stages, size_t stagec, Snake *snakes, GameStage *target)
 {
-    int x, y;
+    int x, y, count = 0;
     do {
         x = 1 + (rand() % (stages[0].w - 2));
         y = 1 + (rand() % (stages[0].h - 2));
-    } while (!coordsEmpty(stages, stagec, snakes, y, x));
-    target->tile[y][x] = GAME_TILE_FOOD;
+    } while (!coordsEmpty(stages, stagec, snakes, y, x) && ++count < 100);
+    if (coordsEmpty(stages, stagec, snakes, y, x)) {
+        target->tile[y][x] = GAME_TILE_FOOD;
+    } else {
+        // Iterate through all fields for 100% certainty
+        for (y = 0; y < target->h; y++) {
+            for (x = 0; x < target->w; x++) {
+                if (coordsEmpty(stages, stagec, snakes, y, x)) {
+                    target->tile[y][x] = GAME_TILE_FOOD;
+                }
+            }
+        }
+    }
 }
 

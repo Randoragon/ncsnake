@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define GAME_STAGE_MIN_W 4
-#define GAME_STAGE_MIN_H 4
-
 Snake *snakesInit()
 {
     Snake *ret;

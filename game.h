@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 
+#define GAME_STAGE_MIN_W 4
+#define GAME_STAGE_MIN_H 4
+
 // Constants
 typedef enum {
     GAME_TILE_EMPTY = 0,

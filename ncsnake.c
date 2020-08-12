@@ -121,6 +121,7 @@ void init()
     paused = FALSE;
     memset(&keybuf, 0, KEYBUF_SIZE * sizeof(keybuf[0]));
     gamestate = GAME_STATE_COUNTDOWN;
+    score = 0;
 
     // Randomize seed
     srand(time(NULL));
@@ -198,8 +199,13 @@ void step()
         }
 
         // Check for collisions
-        if (snakesCollision(snakes, layers, LAYER_COUNT)) {
-            warn("snakeCollision failed", "out-of-bounds snake");
+        switch (snakesCollision(snakes, layers, LAYER_COUNT)) {
+            case 1:
+                warn("snakeCollision failed", "out-of-bounds snake");
+                break;
+            case 2:
+                speed = (++score % 5 ? speed : MIN(speed + 1, FPS));
+                break;
         }
 
         // Update snake positions
@@ -367,6 +373,7 @@ int main(int argc, char **argv)
     // Cleanup
     cleanup();
 
+    printf("FINAL SCORE: %u\n", score);
     return EXIT_SUCCESS;
 }
 

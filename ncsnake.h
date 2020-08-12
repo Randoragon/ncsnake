@@ -36,7 +36,7 @@ typedef enum {
 } GameState;
 
 // Variables
-int running, paused, speed, speedstep, foodcount;
+int running, paused, speed, speedstep, foodcount, score;
 GameState gamestate;
 KeybufKey keybuf[KEYBUF_SIZE];
 unsigned long long tick;

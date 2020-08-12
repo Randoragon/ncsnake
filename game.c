@@ -254,6 +254,7 @@ int snakesCollision(Snake *snakes, GameStage *stages, size_t stagec)
                     s->growth++;
                     st.tile[y][x] = GAME_TILE_EMPTY;
                     spawnFood(stages, stagec, snakes, &st);
+                    return 2;
                 default:
                     break;
             }

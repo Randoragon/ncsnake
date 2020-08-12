@@ -430,6 +430,7 @@ void spawnFood(GameStage *stages, size_t stagec, Snake *snakes, GameStage *targe
             for (x = 0; x < target->w; x++) {
                 if (coordsEmpty(stages, stagec, snakes, y, x)) {
                     target->tile[y][x] = GAME_TILE_FOOD;
+                    return;
                 }
             }
         }

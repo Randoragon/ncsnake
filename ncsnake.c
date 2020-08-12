@@ -204,7 +204,7 @@ void step()
                 warn("snakeCollision failed", "out-of-bounds snake");
                 break;
             case 2:
-                speed = (++score % 5 ? speed : MIN(speed + 1, FPS));
+                speed = (++score % 5 ? speed : MIN(speed + 1, FPS - 1));
                 break;
         }
 
